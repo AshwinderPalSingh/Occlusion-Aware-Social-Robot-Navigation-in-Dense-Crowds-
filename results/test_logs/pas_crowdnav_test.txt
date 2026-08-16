@@ -1,0 +1,2016 @@
+Gym has been unmaintained since 2022 and does not support NumPy 2.0 amongst other critical functionality.
+Please upgrade to Gymnasium, the maintained drop-in replacement of Gym, or contact the authors of your software and request that they upgrade.
+See the migration guide at https://gymnasium.farama.org/introduction/migration_guide/ for additional information.
+2026-08-04 18:06:06, INFO: ----------------------------------------
+2026-08-04 18:06:06, INFO: test seed 0.000000
+2026-08-04 18:06:06, INFO: Val success rate : 0.9
+2026-08-04 18:06:06, INFO: Restored from checkpoint : 41665.pt
+
+Reward=tensor([22.6809])
+Episode 0 ends in 47
+Success
+
+Reward=tensor([22.9199])
+Episode 1 ends in 58
+Success
+
+Reward=tensor([21.9346])
+Episode 2 ends in 57
+Success
+
+Reward=tensor([22.1145])
+Episode 3 ends in 47
+Success
+
+Reward=tensor([21.2405])
+Episode 4 ends in 48
+Success
+
+Reward=tensor([21.4354])
+Episode 5 ends in 50
+Success
+
+Reward=tensor([22.9041])
+Episode 6 ends in 49
+Success
+
+Reward=tensor([22.5013])
+Episode 7 ends in 53
+Success
+
+Reward=tensor([2.3711])
+Episode 8 ends in 54
+Collision
+
+Reward=tensor([22.5251])
+Episode 9 ends in 44
+Success
+
+Reward=tensor([22.6074])
+Episode 10 ends in 59
+Success
+
+Reward=tensor([21.4730])
+Episode 11 ends in 57
+Success
+
+Reward=tensor([21.0309])
+Episode 12 ends in 73
+Success
+
+Reward=tensor([23.3352])
+Episode 13 ends in 45
+Success
+
+Reward=tensor([21.6343])
+Episode 14 ends in 49
+Success
+
+Reward=tensor([22.5597])
+Episode 15 ends in 42
+Success
+
+Reward=tensor([22.3467])
+Episode 16 ends in 43
+Success
+
+Reward=tensor([21.5278])
+Episode 17 ends in 54
+Success
+
+Reward=tensor([21.3934])
+Episode 18 ends in 57
+Success
+
+Reward=tensor([21.6078])
+Episode 19 ends in 43
+Success
+
+Reward=tensor([5.1903])
+Episode 20 ends in 63
+Collision
+
+Reward=tensor([21.8284])
+Episode 21 ends in 46
+Success
+
+Reward=tensor([21.4152])
+Episode 22 ends in 47
+Success
+
+Reward=tensor([22.9002])
+Episode 23 ends in 46
+Success
+
+Reward=tensor([21.5599])
+Episode 24 ends in 42
+Success
+
+Reward=tensor([21.4975])
+Episode 25 ends in 47
+Success
+
+Reward=tensor([21.7231])
+Episode 26 ends in 60
+Success
+
+Reward=tensor([4.9428])
+Episode 27 ends in 67
+Collision
+
+Reward=tensor([22.0970])
+Episode 28 ends in 51
+Success
+
+Reward=tensor([21.6921])
+Episode 29 ends in 59
+Success
+
+Reward=tensor([22.5277])
+Episode 30 ends in 54
+Success
+
+Reward=tensor([22.8097])
+Episode 31 ends in 45
+Success
+
+Reward=tensor([22.5862])
+Episode 32 ends in 60
+Success
+
+Reward=tensor([2.5767])
+Episode 33 ends in 20
+Collision
+
+Reward=tensor([22.2163])
+Episode 34 ends in 42
+Success
+
+Reward=tensor([21.5250])
+Episode 35 ends in 69
+Success
+
+Reward=tensor([21.8163])
+Episode 36 ends in 52
+Success
+
+Reward=tensor([21.4579])
+Episode 37 ends in 50
+Success
+
+Reward=tensor([21.9532])
+Episode 38 ends in 57
+Success
+
+Reward=tensor([23.2818])
+Episode 39 ends in 64
+Success
+
+Reward=tensor([21.9173])
+Episode 40 ends in 57
+Success
+
+Reward=tensor([21.3734])
+Episode 41 ends in 15
+Success
+
+Reward=tensor([21.3589])
+Episode 42 ends in 57
+Success
+
+Reward=tensor([22.0754])
+Episode 43 ends in 43
+Success
+
+Reward=tensor([21.5166])
+Episode 44 ends in 49
+Success
+
+Reward=tensor([22.3171])
+Episode 45 ends in 62
+Success
+
+Reward=tensor([21.6483])
+Episode 46 ends in 53
+Success
+
+Reward=tensor([22.5668])
+Episode 47 ends in 48
+Success
+
+Reward=tensor([21.7863])
+Episode 48 ends in 51
+Success
+
+Reward=tensor([21.4809])
+Episode 49 ends in 43
+Success
+
+Reward=tensor([22.5795])
+Episode 50 ends in 56
+Success
+
+Reward=tensor([21.8485])
+Episode 51 ends in 48
+Success
+
+Reward=tensor([21.6963])
+Episode 52 ends in 49
+Success
+
+Reward=tensor([21.8944])
+Episode 53 ends in 60
+Success
+
+Reward=tensor([20.5492])
+Episode 54 ends in 18
+Success
+
+Reward=tensor([21.1747])
+Episode 55 ends in 69
+Success
+
+Reward=tensor([21.2414])
+Episode 56 ends in 53
+Success
+
+Reward=tensor([7.0782])
+Episode 57 ends in 23
+Collision
+
+Reward=tensor([21.7425])
+Episode 58 ends in 57
+Success
+
+Reward=tensor([21.6641])
+Episode 59 ends in 73
+Success
+
+Reward=tensor([21.8096])
+Episode 60 ends in 43
+Success
+
+Reward=tensor([4.4113])
+Episode 61 ends in 54
+Collision
+
+Reward=tensor([22.4586])
+Episode 62 ends in 51
+Success
+
+Reward=tensor([0.6161])
+Episode 63 ends in 23
+Collision
+
+Reward=tensor([21.7702])
+Episode 64 ends in 54
+Success
+
+Reward=tensor([22.7209])
+Episode 65 ends in 50
+Success
+
+Reward=tensor([22.2140])
+Episode 66 ends in 16
+Success
+
+Reward=tensor([21.8940])
+Episode 67 ends in 42
+Success
+
+Reward=tensor([21.9663])
+Episode 68 ends in 18
+Success
+
+Reward=tensor([3.4132])
+Episode 69 ends in 98
+Collision
+
+Reward=tensor([21.3657])
+Episode 70 ends in 58
+Success
+
+Reward=tensor([22.7426])
+Episode 71 ends in 54
+Success
+
+Reward=tensor([22.2025])
+Episode 72 ends in 44
+Success
+
+Reward=tensor([21.8335])
+Episode 73 ends in 62
+Success
+
+Reward=tensor([22.4621])
+Episode 74 ends in 43
+Success
+
+Reward=tensor([22.5010])
+Episode 75 ends in 55
+Success
+
+Reward=tensor([21.8088])
+Episode 76 ends in 63
+Success
+
+Reward=tensor([22.4545])
+Episode 77 ends in 16
+Success
+
+Reward=tensor([22.4502])
+Episode 78 ends in 50
+Success
+
+Reward=tensor([21.6777])
+Episode 79 ends in 57
+Success
+
+Reward=tensor([21.5067])
+Episode 80 ends in 46
+Success
+
+Reward=tensor([22.0197])
+Episode 81 ends in 49
+Success
+
+Reward=tensor([21.5728])
+Episode 82 ends in 53
+Success
+
+Reward=tensor([21.9396])
+Episode 83 ends in 45
+Success
+
+Reward=tensor([22.4040])
+Episode 84 ends in 94
+Success
+
+Reward=tensor([21.3829])
+Episode 85 ends in 75
+Success
+
+Reward=tensor([20.9876])
+Episode 86 ends in 63
+Success
+
+Reward=tensor([21.3993])
+Episode 87 ends in 48
+Success
+
+Reward=tensor([22.3490])
+Episode 88 ends in 45
+Success
+
+Reward=tensor([22.5432])
+Episode 89 ends in 55
+Success
+
+Reward=tensor([21.0913])
+Episode 90 ends in 44
+Success
+
+Reward=tensor([18.8419])
+Episode 91 ends in 91
+Success
+
+Reward=tensor([22.0547])
+Episode 92 ends in 54
+Success
+
+Reward=tensor([20.8357])
+Episode 93 ends in 42
+Success
+
+Reward=tensor([21.7900])
+Episode 94 ends in 53
+Success
+
+Reward=tensor([21.5884])
+Episode 95 ends in 81
+Success
+
+Reward=tensor([22.0802])
+Episode 96 ends in 48
+Success
+
+Reward=tensor([21.7416])
+Episode 97 ends in 44
+Success
+
+Reward=tensor([19.7964])
+Episode 98 ends in 63
+Success
+
+Reward=tensor([21.4143])
+Episode 99 ends in 54
+Success
+
+Reward=tensor([21.5357])
+Episode 100 ends in 60
+Success
+
+Reward=tensor([22.7378])
+Episode 101 ends in 50
+Success
+
+Reward=tensor([21.5085])
+Episode 102 ends in 54
+Success
+
+Reward=tensor([21.9876])
+Episode 103 ends in 59
+Success
+
+Reward=tensor([21.5194])
+Episode 104 ends in 52
+Success
+
+Reward=tensor([21.7546])
+Episode 105 ends in 73
+Success
+
+Reward=tensor([21.0959])
+Episode 106 ends in 58
+Success
+
+Reward=tensor([21.2602])
+Episode 107 ends in 56
+Success
+
+Reward=tensor([22.8689])
+Episode 108 ends in 56
+Success
+
+Reward=tensor([21.4820])
+Episode 109 ends in 33
+Success
+
+Reward=tensor([22.6904])
+Episode 110 ends in 48
+Success
+
+Reward=tensor([21.7658])
+Episode 111 ends in 51
+Success
+
+Reward=tensor([22.2434])
+Episode 112 ends in 54
+Success
+
+Reward=tensor([21.9849])
+Episode 113 ends in 55
+Success
+
+Reward=tensor([21.2886])
+Episode 114 ends in 56
+Success
+
+Reward=tensor([21.5507])
+Episode 115 ends in 44
+Success
+
+Reward=tensor([22.3894])
+Episode 116 ends in 49
+Success
+
+Reward=tensor([21.3013])
+Episode 117 ends in 61
+Success
+
+Reward=tensor([4.0883])
+Episode 118 ends in 19
+Collision
+
+Reward=tensor([21.9820])
+Episode 119 ends in 84
+Success
+
+Reward=tensor([21.6264])
+Episode 120 ends in 45
+Success
+
+Reward=tensor([3.6211])
+Episode 121 ends in 65
+Collision
+
+Reward=tensor([20.4283])
+Episode 122 ends in 51
+Success
+
+Reward=tensor([21.8418])
+Episode 123 ends in 52
+Success
+
+Reward=tensor([22.0030])
+Episode 124 ends in 47
+Success
+
+Reward=tensor([21.4996])
+Episode 125 ends in 53
+Success
+
+Reward=tensor([21.5764])
+Episode 126 ends in 70
+Success
+
+Reward=tensor([21.3427])
+Episode 127 ends in 55
+Success
+
+Reward=tensor([21.4856])
+Episode 128 ends in 56
+Success
+
+Reward=tensor([21.7614])
+Episode 129 ends in 61
+Success
+
+Reward=tensor([21.3408])
+Episode 130 ends in 45
+Success
+
+Reward=tensor([22.8901])
+Episode 131 ends in 62
+Success
+
+Reward=tensor([22.1593])
+Episode 132 ends in 53
+Success
+
+Reward=tensor([22.3502])
+Episode 133 ends in 49
+Success
+
+Reward=tensor([21.5834])
+Episode 134 ends in 52
+Success
+
+Reward=tensor([21.5988])
+Episode 135 ends in 52
+Success
+
+Reward=tensor([22.6865])
+Episode 136 ends in 53
+Success
+
+Reward=tensor([22.5298])
+Episode 137 ends in 74
+Success
+
+Reward=tensor([21.3804])
+Episode 138 ends in 52
+Success
+
+Reward=tensor([22.2841])
+Episode 139 ends in 46
+Success
+
+Reward=tensor([21.3070])
+Episode 140 ends in 52
+Success
+
+Reward=tensor([21.8790])
+Episode 141 ends in 51
+Success
+
+Reward=tensor([22.4077])
+Episode 142 ends in 46
+Success
+
+Reward=tensor([21.2765])
+Episode 143 ends in 73
+Success
+
+Reward=tensor([21.6280])
+Episode 144 ends in 16
+Success
+
+Reward=tensor([22.4532])
+Episode 145 ends in 47
+Success
+
+Reward=tensor([21.7360])
+Episode 146 ends in 53
+Success
+
+Reward=tensor([22.4198])
+Episode 147 ends in 48
+Success
+
+Reward=tensor([21.5237])
+Episode 148 ends in 53
+Success
+
+Reward=tensor([21.6119])
+Episode 149 ends in 45
+Success
+
+Reward=tensor([20.8491])
+Episode 150 ends in 66
+Success
+
+Reward=tensor([21.7702])
+Episode 151 ends in 52
+Success
+
+Reward=tensor([21.5766])
+Episode 152 ends in 50
+Success
+
+Reward=tensor([21.1316])
+Episode 153 ends in 60
+Success
+
+Reward=tensor([22.3219])
+Episode 154 ends in 46
+Success
+
+Reward=tensor([23.1781])
+Episode 155 ends in 56
+Success
+
+Reward=tensor([22.5017])
+Episode 156 ends in 51
+Success
+
+Reward=tensor([21.5896])
+Episode 157 ends in 60
+Success
+
+Reward=tensor([21.3820])
+Episode 158 ends in 47
+Success
+
+Reward=tensor([22.2224])
+Episode 159 ends in 65
+Success
+
+Reward=tensor([22.8390])
+Episode 160 ends in 45
+Success
+
+Reward=tensor([0.5316])
+Episode 161 ends in 13
+Collision
+
+Reward=tensor([22.0255])
+Episode 162 ends in 46
+Success
+
+Reward=tensor([22.4815])
+Episode 163 ends in 51
+Success
+
+Reward=tensor([21.3766])
+Episode 164 ends in 49
+Success
+
+Reward=tensor([21.7280])
+Episode 165 ends in 57
+Success
+
+Reward=tensor([21.5393])
+Episode 166 ends in 51
+Success
+
+Reward=tensor([21.7289])
+Episode 167 ends in 57
+Success
+
+Reward=tensor([21.9271])
+Episode 168 ends in 48
+Success
+
+Reward=tensor([21.7844])
+Episode 169 ends in 53
+Success
+
+Reward=tensor([22.9360])
+Episode 170 ends in 50
+Success
+
+Reward=tensor([21.5676])
+Episode 171 ends in 68
+Success
+
+Reward=tensor([22.5917])
+Episode 172 ends in 50
+Success
+
+Reward=tensor([22.0530])
+Episode 173 ends in 60
+Success
+
+Reward=tensor([21.4955])
+Episode 174 ends in 61
+Success
+
+Reward=tensor([22.2571])
+Episode 175 ends in 49
+Success
+
+Reward=tensor([21.8186])
+Episode 176 ends in 48
+Success
+
+Reward=tensor([22.7273])
+Episode 177 ends in 48
+Success
+
+Reward=tensor([22.4488])
+Episode 178 ends in 71
+Success
+
+Reward=tensor([22.2136])
+Episode 179 ends in 62
+Success
+
+Reward=tensor([21.7620])
+Episode 180 ends in 52
+Success
+
+Reward=tensor([21.7032])
+Episode 181 ends in 51
+Success
+
+Reward=tensor([21.9266])
+Episode 182 ends in 63
+Success
+
+Reward=tensor([22.1469])
+Episode 183 ends in 48
+Success
+
+Reward=tensor([21.9948])
+Episode 184 ends in 56
+Success
+
+Reward=tensor([22.6127])
+Episode 185 ends in 48
+Success
+
+Reward=tensor([6.7833])
+Episode 186 ends in 21
+Collision
+
+Reward=tensor([21.7458])
+Episode 187 ends in 49
+Success
+
+Reward=tensor([21.8040])
+Episode 188 ends in 43
+Success
+
+Reward=tensor([21.8454])
+Episode 189 ends in 65
+Success
+
+Reward=tensor([21.8206])
+Episode 190 ends in 48
+Success
+
+Reward=tensor([22.5178])
+Episode 191 ends in 50
+Success
+
+Reward=tensor([21.5790])
+Episode 192 ends in 50
+Success
+
+Reward=tensor([21.4971])
+Episode 193 ends in 55
+Success
+
+Reward=tensor([21.5941])
+Episode 194 ends in 61
+Success
+
+Reward=tensor([21.4244])
+Episode 195 ends in 53
+Success
+
+Reward=tensor([22.2821])
+Episode 196 ends in 62
+Success
+
+Reward=tensor([21.3768])
+Episode 197 ends in 48
+Success
+
+Reward=tensor([22.6412])
+Episode 198 ends in 54
+Success
+
+Reward=tensor([22.5685])
+Episode 199 ends in 49
+Success
+
+Reward=tensor([21.8352])
+Episode 200 ends in 49
+Success
+
+Reward=tensor([21.6752])
+Episode 201 ends in 50
+Success
+
+Reward=tensor([21.2329])
+Episode 202 ends in 50
+Success
+
+Reward=tensor([21.5435])
+Episode 203 ends in 51
+Success
+
+Reward=tensor([21.3245])
+Episode 204 ends in 55
+Success
+
+Reward=tensor([21.7060])
+Episode 205 ends in 42
+Success
+
+Reward=tensor([21.3968])
+Episode 206 ends in 20
+Success
+
+Reward=tensor([23.0310])
+Episode 207 ends in 49
+Success
+
+Reward=tensor([21.2998])
+Episode 208 ends in 66
+Success
+
+Reward=tensor([21.8884])
+Episode 209 ends in 50
+Success
+
+Reward=tensor([22.3041])
+Episode 210 ends in 50
+Success
+
+Reward=tensor([22.0558])
+Episode 211 ends in 53
+Success
+
+Reward=tensor([22.4192])
+Episode 212 ends in 48
+Success
+
+Reward=tensor([21.7886])
+Episode 213 ends in 45
+Success
+
+Reward=tensor([21.3201])
+Episode 214 ends in 49
+Success
+
+Reward=tensor([21.9809])
+Episode 215 ends in 58
+Success
+
+Reward=tensor([21.9201])
+Episode 216 ends in 57
+Success
+
+Reward=tensor([21.5122])
+Episode 217 ends in 86
+Success
+
+Reward=tensor([21.5870])
+Episode 218 ends in 46
+Success
+
+Reward=tensor([20.8386])
+Episode 219 ends in 57
+Success
+
+Reward=tensor([22.3617])
+Episode 220 ends in 56
+Success
+
+Reward=tensor([21.2959])
+Episode 221 ends in 17
+Success
+
+Reward=tensor([22.5933])
+Episode 222 ends in 47
+Success
+
+Reward=tensor([23.0620])
+Episode 223 ends in 49
+Success
+
+Reward=tensor([21.7202])
+Episode 224 ends in 59
+Success
+
+Reward=tensor([21.4418])
+Episode 225 ends in 45
+Success
+
+Reward=tensor([22.4028])
+Episode 226 ends in 53
+Success
+
+Reward=tensor([22.3985])
+Episode 227 ends in 51
+Success
+
+Reward=tensor([6.4130])
+Episode 228 ends in 20
+Collision
+
+Reward=tensor([20.3051])
+Episode 229 ends in 61
+Success
+
+Reward=tensor([21.7778])
+Episode 230 ends in 59
+Success
+
+Reward=tensor([22.6809])
+Episode 231 ends in 54
+Success
+
+Reward=tensor([21.0920])
+Episode 232 ends in 58
+Success
+
+Reward=tensor([22.5192])
+Episode 233 ends in 61
+Success
+
+Reward=tensor([5.2721])
+Episode 234 ends in 23
+Collision
+
+Reward=tensor([22.6238])
+Episode 235 ends in 51
+Success
+
+Reward=tensor([21.6794])
+Episode 236 ends in 74
+Success
+
+Reward=tensor([21.1645])
+Episode 237 ends in 58
+Success
+
+Reward=tensor([22.6854])
+Episode 238 ends in 64
+Success
+
+Reward=tensor([22.1682])
+Episode 239 ends in 64
+Success
+
+Reward=tensor([21.6751])
+Episode 240 ends in 46
+Success
+
+Reward=tensor([21.6913])
+Episode 241 ends in 55
+Success
+
+Reward=tensor([21.9542])
+Episode 242 ends in 47
+Success
+
+Reward=tensor([22.1938])
+Episode 243 ends in 45
+Success
+
+Reward=tensor([22.6416])
+Episode 244 ends in 43
+Success
+
+Reward=tensor([21.5814])
+Episode 245 ends in 62
+Success
+
+Reward=tensor([21.3438])
+Episode 246 ends in 53
+Success
+
+Reward=tensor([22.2831])
+Episode 247 ends in 52
+Success
+
+Reward=tensor([21.4456])
+Episode 248 ends in 48
+Success
+
+Reward=tensor([22.2288])
+Episode 249 ends in 48
+Success
+
+Reward=tensor([22.8621])
+Episode 250 ends in 16
+Success
+
+Reward=tensor([22.2999])
+Episode 251 ends in 46
+Success
+
+Reward=tensor([21.6067])
+Episode 252 ends in 68
+Success
+
+Reward=tensor([21.3472])
+Episode 253 ends in 44
+Success
+
+Reward=tensor([21.4866])
+Episode 254 ends in 62
+Success
+
+Reward=tensor([21.9725])
+Episode 255 ends in 57
+Success
+
+Reward=tensor([22.6985])
+Episode 256 ends in 55
+Success
+
+Reward=tensor([21.1557])
+Episode 257 ends in 77
+Success
+
+Reward=tensor([22.5032])
+Episode 258 ends in 72
+Success
+
+Reward=tensor([22.8282])
+Episode 259 ends in 63
+Success
+
+Reward=tensor([21.8896])
+Episode 260 ends in 46
+Success
+
+Reward=tensor([21.6417])
+Episode 261 ends in 48
+Success
+
+Reward=tensor([21.6573])
+Episode 262 ends in 47
+Success
+
+Reward=tensor([21.4197])
+Episode 263 ends in 46
+Success
+
+Reward=tensor([22.6706])
+Episode 264 ends in 51
+Success
+
+Reward=tensor([21.4851])
+Episode 265 ends in 47
+Success
+
+Reward=tensor([22.1158])
+Episode 266 ends in 57
+Success
+
+Reward=tensor([4.5907])
+Episode 267 ends in 24
+Collision
+
+Reward=tensor([21.4935])
+Episode 268 ends in 40
+Success
+
+Reward=tensor([21.9155])
+Episode 269 ends in 54
+Success
+
+Reward=tensor([21.7386])
+Episode 270 ends in 44
+Success
+
+Reward=tensor([21.9454])
+Episode 271 ends in 73
+Success
+
+Reward=tensor([21.6155])
+Episode 272 ends in 46
+Success
+
+Reward=tensor([22.6609])
+Episode 273 ends in 55
+Success
+
+Reward=tensor([21.3918])
+Episode 274 ends in 43
+Success
+
+Reward=tensor([23.0697])
+Episode 275 ends in 47
+Success
+
+Reward=tensor([5.0627])
+Episode 276 ends in 60
+Collision
+
+Reward=tensor([21.7075])
+Episode 277 ends in 61
+Success
+
+Reward=tensor([22.7308])
+Episode 278 ends in 49
+Success
+
+Reward=tensor([21.4545])
+Episode 279 ends in 52
+Success
+
+Reward=tensor([21.3966])
+Episode 280 ends in 49
+Success
+
+Reward=tensor([21.6983])
+Episode 281 ends in 64
+Success
+
+Reward=tensor([22.1425])
+Episode 282 ends in 52
+Success
+
+Reward=tensor([21.6241])
+Episode 283 ends in 48
+Success
+
+Reward=tensor([21.6259])
+Episode 284 ends in 55
+Success
+
+Reward=tensor([22.0850])
+Episode 285 ends in 52
+Success
+
+Reward=tensor([23.0152])
+Episode 286 ends in 51
+Success
+
+Reward=tensor([6.0613])
+Episode 287 ends in 84
+Collision
+
+Reward=tensor([21.8065])
+Episode 288 ends in 53
+Success
+
+Reward=tensor([0.5123])
+Episode 289 ends in 16
+Collision
+
+Reward=tensor([22.3752])
+Episode 290 ends in 63
+Success
+
+Reward=tensor([21.5739])
+Episode 291 ends in 72
+Success
+
+Reward=tensor([21.1734])
+Episode 292 ends in 49
+Success
+
+Reward=tensor([22.5279])
+Episode 293 ends in 54
+Success
+
+Reward=tensor([20.6641])
+Episode 294 ends in 79
+Success
+
+Reward=tensor([22.1733])
+Episode 295 ends in 53
+Success
+
+Reward=tensor([22.7767])
+Episode 296 ends in 48
+Success
+
+Reward=tensor([22.4928])
+Episode 297 ends in 47
+Success
+
+Reward=tensor([-1.5080])
+Episode 298 ends in 51
+Collision
+
+Reward=tensor([22.2110])
+Episode 299 ends in 46
+Success
+
+Reward=tensor([21.2427])
+Episode 300 ends in 50
+Success
+
+Reward=tensor([21.9183])
+Episode 301 ends in 50
+Success
+
+Reward=tensor([22.1899])
+Episode 302 ends in 52
+Success
+
+Reward=tensor([21.9259])
+Episode 303 ends in 54
+Success
+
+Reward=tensor([21.2994])
+Episode 304 ends in 60
+Success
+
+Reward=tensor([21.7789])
+Episode 305 ends in 50
+Success
+
+Reward=tensor([21.8492])
+Episode 306 ends in 60
+Success
+
+Reward=tensor([21.3789])
+Episode 307 ends in 50
+Success
+
+Reward=tensor([21.3964])
+Episode 308 ends in 50
+Success
+
+Reward=tensor([21.3866])
+Episode 309 ends in 48
+Success
+
+Reward=tensor([20.4618])
+Episode 310 ends in 60
+Success
+
+Reward=tensor([22.0408])
+Episode 311 ends in 77
+Success
+
+Reward=tensor([20.9605])
+Episode 312 ends in 14
+Success
+
+Reward=tensor([22.8844])
+Episode 313 ends in 55
+Success
+
+Reward=tensor([21.7620])
+Episode 314 ends in 54
+Success
+
+Reward=tensor([22.1583])
+Episode 315 ends in 68
+Success
+
+Reward=tensor([22.1517])
+Episode 316 ends in 66
+Success
+
+Reward=tensor([22.5600])
+Episode 317 ends in 59
+Success
+
+Reward=tensor([19.9653])
+Episode 318 ends in 49
+Success
+
+Reward=tensor([21.5028])
+Episode 319 ends in 58
+Success
+
+Reward=tensor([21.5191])
+Episode 320 ends in 47
+Success
+
+Reward=tensor([21.7937])
+Episode 321 ends in 60
+Success
+
+Reward=tensor([22.2851])
+Episode 322 ends in 54
+Success
+
+Reward=tensor([21.6663])
+Episode 323 ends in 44
+Success
+
+Reward=tensor([22.4119])
+Episode 324 ends in 47
+Success
+
+Reward=tensor([20.9373])
+Episode 325 ends in 76
+Success
+
+Reward=tensor([21.3475])
+Episode 326 ends in 59
+Success
+
+Reward=tensor([22.0694])
+Episode 327 ends in 66
+Success
+
+Reward=tensor([21.8047])
+Episode 328 ends in 15
+Success
+
+Reward=tensor([22.6448])
+Episode 329 ends in 44
+Success
+
+Reward=tensor([22.1002])
+Episode 330 ends in 46
+Success
+
+Reward=tensor([21.6676])
+Episode 331 ends in 57
+Success
+
+Reward=tensor([21.6217])
+Episode 332 ends in 52
+Success
+
+Reward=tensor([21.4106])
+Episode 333 ends in 54
+Success
+
+Reward=tensor([22.1798])
+Episode 334 ends in 47
+Success
+
+Reward=tensor([21.3719])
+Episode 335 ends in 53
+Success
+
+Reward=tensor([2.6091])
+Episode 336 ends in 38
+Collision
+
+Reward=tensor([21.5983])
+Episode 337 ends in 86
+Success
+
+Reward=tensor([21.0658])
+Episode 338 ends in 15
+Success
+
+Reward=tensor([0.3699])
+Episode 339 ends in 52
+Collision
+
+Reward=tensor([20.5471])
+Episode 340 ends in 57
+Success
+
+Reward=tensor([22.7372])
+Episode 341 ends in 47
+Success
+
+Reward=tensor([21.3713])
+Episode 342 ends in 49
+Success
+
+Reward=tensor([21.4986])
+Episode 343 ends in 46
+Success
+
+Reward=tensor([21.4622])
+Episode 344 ends in 73
+Success
+
+Reward=tensor([21.6111])
+Episode 345 ends in 55
+Success
+
+Reward=tensor([4.4321])
+Episode 346 ends in 43
+Collision
+
+Reward=tensor([21.7417])
+Episode 347 ends in 50
+Success
+
+Reward=tensor([20.4195])
+Episode 348 ends in 69
+Success
+
+Reward=tensor([22.1312])
+Episode 349 ends in 47
+Success
+
+Reward=tensor([21.4196])
+Episode 350 ends in 50
+Success
+
+Reward=tensor([22.2865])
+Episode 351 ends in 53
+Success
+
+Reward=tensor([4.3419])
+Episode 352 ends in 72
+Collision
+
+Reward=tensor([21.7989])
+Episode 353 ends in 51
+Success
+
+Reward=tensor([22.4446])
+Episode 354 ends in 66
+Success
+
+Reward=tensor([21.6227])
+Episode 355 ends in 65
+Success
+
+Reward=tensor([21.4007])
+Episode 356 ends in 47
+Success
+
+Reward=tensor([21.4215])
+Episode 357 ends in 44
+Success
+
+Reward=tensor([22.8694])
+Episode 358 ends in 16
+Success
+
+Reward=tensor([22.2551])
+Episode 359 ends in 44
+Success
+
+Reward=tensor([6.8814])
+Episode 360 ends in 27
+Collision
+
+Reward=tensor([20.8538])
+Episode 361 ends in 61
+Success
+
+Reward=tensor([21.9704])
+Episode 362 ends in 64
+Success
+
+Reward=tensor([21.6565])
+Episode 363 ends in 51
+Success
+
+Reward=tensor([21.4207])
+Episode 364 ends in 67
+Success
+
+Reward=tensor([21.3615])
+Episode 365 ends in 60
+Success
+
+Reward=tensor([21.4888])
+Episode 366 ends in 51
+Success
+
+Reward=tensor([21.3753])
+Episode 367 ends in 53
+Success
+
+Reward=tensor([22.7047])
+Episode 368 ends in 47
+Success
+
+Reward=tensor([19.7195])
+Episode 369 ends in 69
+Success
+
+Reward=tensor([22.4698])
+Episode 370 ends in 53
+Success
+
+Reward=tensor([21.3918])
+Episode 371 ends in 15
+Success
+
+Reward=tensor([21.8025])
+Episode 372 ends in 71
+Success
+
+Reward=tensor([22.2954])
+Episode 373 ends in 70
+Success
+
+Reward=tensor([22.1881])
+Episode 374 ends in 78
+Success
+
+Reward=tensor([20.3484])
+Episode 375 ends in 70
+Success
+
+Reward=tensor([21.4733])
+Episode 376 ends in 48
+Success
+
+Reward=tensor([21.0386])
+Episode 377 ends in 44
+Success
+
+Reward=tensor([22.0181])
+Episode 378 ends in 70
+Success
+
+Reward=tensor([21.3066])
+Episode 379 ends in 18
+Success
+
+Reward=tensor([23.0097])
+Episode 380 ends in 44
+Success
+
+Reward=tensor([22.0623])
+Episode 381 ends in 50
+Success
+
+Reward=tensor([22.5997])
+Episode 382 ends in 16
+Success
+
+Reward=tensor([1.1159])
+Episode 383 ends in 12
+Collision
+
+Reward=tensor([21.8638])
+Episode 384 ends in 57
+Success
+
+Reward=tensor([22.3734])
+Episode 385 ends in 69
+Success
+
+Reward=tensor([21.4796])
+Episode 386 ends in 57
+Success
+
+Reward=tensor([21.6346])
+Episode 387 ends in 55
+Success
+
+Reward=tensor([22.0625])
+Episode 388 ends in 51
+Success
+
+Reward=tensor([22.5547])
+Episode 389 ends in 47
+Success
+
+Reward=tensor([21.7375])
+Episode 390 ends in 55
+Success
+
+Reward=tensor([21.6681])
+Episode 391 ends in 63
+Success
+
+Reward=tensor([21.3363])
+Episode 392 ends in 15
+Success
+
+Reward=tensor([21.8333])
+Episode 393 ends in 63
+Success
+
+Reward=tensor([22.2368])
+Episode 394 ends in 47
+Success
+
+Reward=tensor([21.4661])
+Episode 395 ends in 52
+Success
+
+Reward=tensor([21.8871])
+Episode 396 ends in 57
+Success
+
+Reward=tensor([21.5733])
+Episode 397 ends in 60
+Success
+
+Reward=tensor([21.5765])
+Episode 398 ends in 43
+Success
+
+Reward=tensor([21.3755])
+Episode 399 ends in 46
+Success
+
+Reward=tensor([21.9305])
+Episode 400 ends in 54
+Success
+
+Reward=tensor([22.7050])
+Episode 401 ends in 60
+Success
+
+Reward=tensor([21.7570])
+Episode 402 ends in 45
+Success
+
+Reward=tensor([23.3499])
+Episode 403 ends in 71
+Success
+
+Reward=tensor([21.5616])
+Episode 404 ends in 60
+Success
+
+Reward=tensor([6.4592])
+Episode 405 ends in 17
+Collision
+
+Reward=tensor([22.4496])
+Episode 406 ends in 50
+Success
+
+Reward=tensor([22.1953])
+Episode 407 ends in 49
+Success
+
+Reward=tensor([21.5482])
+Episode 408 ends in 49
+Success
+
+Reward=tensor([21.6447])
+Episode 409 ends in 51
+Success
+
+Reward=tensor([21.6417])
+Episode 410 ends in 90
+Success
+
+Reward=tensor([21.4141])
+Episode 411 ends in 53
+Success
+
+Reward=tensor([22.5872])
+Episode 412 ends in 44
+Success
+
+Reward=tensor([21.9186])
+Episode 413 ends in 59
+Success
+
+Reward=tensor([21.8211])
+Episode 414 ends in 58
+Success
+
+Reward=tensor([22.2739])
+Episode 415 ends in 19
+Success
+
+Reward=tensor([21.3018])
+Episode 416 ends in 51
+Success
+
+Reward=tensor([21.8953])
+Episode 417 ends in 43
+Success
+
+Reward=tensor([21.6410])
+Episode 418 ends in 55
+Success
+
+Reward=tensor([22.5448])
+Episode 419 ends in 45
+Success
+
+Reward=tensor([21.2641])
+Episode 420 ends in 15
+Success
+
+Reward=tensor([21.0337])
+Episode 421 ends in 63
+Success
+
+Reward=tensor([21.0776])
+Episode 422 ends in 76
+Success
+
+Reward=tensor([-2.7414])
+Episode 423 ends in 7
+Collision
+
+Reward=tensor([22.0428])
+Episode 424 ends in 65
+Success
+
+Reward=tensor([22.3244])
+Episode 425 ends in 47
+Success
+
+Reward=tensor([22.0842])
+Episode 426 ends in 47
+Success
+
+Reward=tensor([21.7705])
+Episode 427 ends in 57
+Success
+
+Reward=tensor([21.4777])
+Episode 428 ends in 52
+Success
+
+Reward=tensor([21.5584])
+Episode 429 ends in 15
+Success
+
+Reward=tensor([21.7255])
+Episode 430 ends in 61
+Success
+
+Reward=tensor([22.2399])
+Episode 431 ends in 63
+Success
+
+Reward=tensor([21.5848])
+Episode 432 ends in 58
+Success
+
+Reward=tensor([22.5091])
+Episode 433 ends in 46
+Success
+
+Reward=tensor([21.7494])
+Episode 434 ends in 65
+Success
+
+Reward=tensor([21.4010])
+Episode 435 ends in 64
+Success
+
+Reward=tensor([21.8396])
+Episode 436 ends in 45
+Success
+
+Reward=tensor([21.2749])
+Episode 437 ends in 60
+Success
+
+Reward=tensor([22.6455])
+Episode 438 ends in 52
+Success
+
+Reward=tensor([21.5885])
+Episode 439 ends in 53
+Success
+
+Reward=tensor([21.0256])
+Episode 440 ends in 15
+Success
+
+Reward=tensor([21.9717])
+Episode 441 ends in 48
+Success
+
+Reward=tensor([21.7785])
+Episode 442 ends in 43
+Success
+
+Reward=tensor([22.4570])
+Episode 443 ends in 64
+Success
+
+Reward=tensor([22.3308])
+Episode 444 ends in 49
+Success
+
+Reward=tensor([21.4092])
+Episode 445 ends in 48
+Success
+
+Reward=tensor([20.7716])
+Episode 446 ends in 57
+Success
+
+Reward=tensor([22.2898])
+Episode 447 ends in 65
+Success
+
+Reward=tensor([22.8830])
+Episode 448 ends in 61
+Success
+
+Reward=tensor([21.2825])
+Episode 449 ends in 51
+Success
+
+Reward=tensor([22.8903])
+Episode 450 ends in 51
+Success
+
+Reward=tensor([20.9795])
+Episode 451 ends in 56
+Success
+
+Reward=tensor([21.7821])
+Episode 452 ends in 77
+Success
+
+Reward=tensor([21.4404])
+Episode 453 ends in 47
+Success
+
+Reward=tensor([21.6480])
+Episode 454 ends in 59
+Success
+
+Reward=tensor([21.5699])
+Episode 455 ends in 16
+Success
+
+Reward=tensor([21.3841])
+Episode 456 ends in 61
+Success
+
+Reward=tensor([20.9712])
+Episode 457 ends in 58
+Success
+
+Reward=tensor([21.3982])
+Episode 458 ends in 47
+Success
+
+Reward=tensor([21.6631])
+Episode 459 ends in 62
+Success
+
+Reward=tensor([21.8247])
+Episode 460 ends in 57
+Success
+
+Reward=tensor([22.2680])
+Episode 461 ends in 48
+Success
+
+Reward=tensor([21.6068])
+Episode 462 ends in 48
+Success
+
+Reward=tensor([21.9754])
+Episode 463 ends in 66
+Success
+
+Reward=tensor([21.8603])
+Episode 464 ends in 46
+Success
+
+Reward=tensor([21.6042])
+Episode 465 ends in 49
+Success
+
+Reward=tensor([22.5824])
+Episode 466 ends in 66
+Success
+
+Reward=tensor([21.3082])
+Episode 467 ends in 65
+Success
+
+Reward=tensor([19.5616])
+Episode 468 ends in 60
+Success
+
+Reward=tensor([21.5372])
+Episode 469 ends in 54
+Success
+
+Reward=tensor([22.4159])
+Episode 470 ends in 55
+Success
+
+Reward=tensor([21.5697])
+Episode 471 ends in 58
+Success
+
+Reward=tensor([22.4388])
+Episode 472 ends in 24
+Success
+
+Reward=tensor([0.7942])
+Episode 473 ends in 11
+Collision
+
+Reward=tensor([22.1417])
+Episode 474 ends in 58
+Success
+
+Reward=tensor([21.8551])
+Episode 475 ends in 72
+Success
+
+Reward=tensor([22.2085])
+Episode 476 ends in 73
+Success
+
+Reward=tensor([21.5443])
+Episode 477 ends in 60
+Success
+
+Reward=tensor([22.9926])
+Episode 478 ends in 56
+Success
+
+Reward=tensor([19.3947])
+Episode 479 ends in 110
+Success
+
+Reward=tensor([21.4133])
+Episode 480 ends in 45
+Success
+
+Reward=tensor([21.5292])
+Episode 481 ends in 56
+Success
+
+Reward=tensor([21.8695])
+Episode 482 ends in 45
+Success
+
+Reward=tensor([21.5682])
+Episode 483 ends in 57
+Success
+
+Reward=tensor([21.4214])
+Episode 484 ends in 53
+Success
+
+Reward=tensor([22.1944])
+Episode 485 ends in 50
+Success
+
+Reward=tensor([22.4966])
+Episode 486 ends in 45
+Success
+
+Reward=tensor([21.6781])
+Episode 487 ends in 63
+Success
+
+Reward=tensor([21.4100])
+Episode 488 ends in 55
+Success
+
+Reward=tensor([22.5692])
+Episode 489 ends in 47
+Success
+
+Reward=tensor([21.9291])
+Episode 490 ends in 59
+Success
+
+Reward=tensor([21.9526])
+Episode 491 ends in 54
+Success
+
+Reward=tensor([21.7714])
+Episode 492 ends in 50
+Success
+
+Reward=tensor([21.5963])
+Episode 493 ends in 48
+Success
+
+Reward=tensor([20.8632])
+Episode 494 ends in 68
+Success
+
+Reward=tensor([22.9379])
+Episode 495 ends in 52
+Success
+
+Reward=tensor([22.0605])
+Episode 496 ends in 51
+Success
+
+Reward=tensor([21.5510])
+Episode 497 ends in 53
+Success
+
+Reward=tensor([21.4924])
+Episode 498 ends in 15
+Success
+
+Reward=tensor([22.1398])
+Episode 499 ends in 49
+Success
+2026-08-04 19:01:31, INFO: TEST  has success rate: 0.94, collision rate: 0.06, timeout rate: 0.00, nav time (mean/var): 12.71/9.70, total reward: 17.4012
+2026-08-04 19:01:31, INFO: Frequency of being in danger: 0.02 and average min separate distance in danger: 0.17
+2026-08-04 19:01:31, INFO: TEST  has image similarity(pas/sensor): 454.634/477.151
+2026-08-04 19:01:31, INFO:  occupied image similarity(pas/sensor): 71.448/62.486 and free image similarity(pas/sensor): 0.040/14.666 and occluded image similarity(pas/sensor): 383.146/400.000 
+2026-08-04 19:01:31, INFO: TEST  has average path length (mean/var): 11.05/5.80
+2026-08-04 19:01:31, INFO: Collision cases: 8 20 27 33 57 61 63 69 118 121 161 186 228 234 267 276 287 289 298 336 339 346 352 360 383 405 423 473
+2026-08-04 19:01:31, INFO: Timeout cases: 
+ Evaluation using 500 episodes: mean reward 20.80983
+

@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+venv/
+.env/
+*.egg-info/
+
+# Large model files
+*.pt
+*.pth
+*.zip
+*.tar.gz
+
+# Data & logs (keep results folder but ignore raw checkpoints)
+data/
+logs/
+
+# System
+.DS_Store
+.DS_Store?
+._*
+
+# IDE
+.vscode/
+.idea/
+*.swp

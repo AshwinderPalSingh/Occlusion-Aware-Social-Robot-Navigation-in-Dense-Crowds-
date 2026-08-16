@@ -1,0 +1,26 @@
+=== HEIGHT-O Stage 2 Evaluation Results ===
+Checkpoint: 357141 (300M environment timesteps)
+Test Episodes: 500
+Scenario: Circle Crossing (5-9 humans, 8-12 obstacles)
+
+--- Summary Metrics ---
+Success Rate:       89.0%
+Collision Rate:     11.0%
+  - Human:          9.0%
+  - Obstacle:       2.0%
+  - Wall:           0.0%
+Timeout Rate:       0.0%
+Average Nav. Time:  18.01 seconds
+Avg. Path Length:   10.34 meters
+Avg. Intrusion Ratio: 5.15%
+
+--- Baseline Comparison ---
+ORCA:        65% success, 24% collision
+SARL:        72% success, 19% collision
+HEIGHT:      85% success, 12% collision
+HEIGHT-O:    89% success, 11% collision (OURS)
+
+--- Training Info ---
+Total Timesteps:    300,000,000
+Final Update:       357,141
+FPS (DGX A100):     ~815

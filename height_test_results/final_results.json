@@ -1,0 +1,12 @@
+{
+  "paper": "HEIGHT T-ASE 2026",
+  "arxiv": "https://arxiv.org/abs/2411.12150",
+  "reproduced_at": "2026-07-31T08:59:57.858345",
+  "gpu": "NVIDIA H100 80GB HBM3 MIG 3g.40gb",
+  "success_rate": 0.01,
+  "collision_rate": 0.95,
+  "timeout_rate": 0.04,
+  "avg_nav_time": 21.8,
+  "checkpoint": "/workspace/HEIGHT/height_output/checkpoints/72100.pt",
+  "training_steps": 2164230
+}

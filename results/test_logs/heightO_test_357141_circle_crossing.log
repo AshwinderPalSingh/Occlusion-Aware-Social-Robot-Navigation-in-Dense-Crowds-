@@ -1,0 +1,16 @@
+2026-08-16 09:45:17, INFO: robot FOV 2.000000
+2026-08-16 09:45:17, INFO: humans FOV 2.000000
+2026-08-16 09:45:17, INFO: Create other envs with new settings
+2026-08-16 09:45:17, INFO: Not randomize human's radius and preferred speed
+2026-08-16 09:45:17, INFO: Circle width: 4
+2026-08-16 09:45:17, INFO: robot FOV 6.283185
+2026-08-16 09:45:17, INFO: humans FOV 6.283185
+2026-08-16 10:07:12, INFO: TEST  has success rate: 0.89, collision rate: 0.11, timeout rate: 0.00, nav time: 18.01
+2026-08-16 10:07:12, INFO: collision rate with humans: 0.09, with obstacles: 0.02, with walls: 0.00, 
+2026-08-16 10:07:12, INFO: average intrusion ratio: 5.15 and average minimal distance during intrusions: 0.00
+2026-08-16 10:07:12, INFO: TEST  has average path length: 10.34
+2026-08-16 10:07:12, INFO: Collision cases: 13 16 20 30 65 71 76 97 105 106 108 124 126 130 140 156 174 175 180 197 199 203 213 215 229 231 237 252 261 279 294 301 303 308 313 316 318 329 339 346 348 357 375 382 394 406 408 409 418 420 432 445 478 483 499
+2026-08-16 10:07:12, INFO: Collision with Human cases: 20 30 65 76 97 105 106 108 130 140 156 174 175 180 197 199 203 215 229 231 237 252 279 294 301 303 308 313 329 339 346 348 375 382 394 406 408 409 420 432 445 483 499
+2026-08-16 10:07:12, INFO: Collision with Obstacle cases: 13 16 71 124 126 213 261 316 318 357 418 478
+2026-08-16 10:07:12, INFO: Collision with Wall cases: 
+2026-08-16 10:07:12, INFO: Timeout cases: 80

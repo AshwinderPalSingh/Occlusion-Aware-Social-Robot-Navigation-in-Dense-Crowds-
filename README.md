@@ -54,10 +54,10 @@ The inferred latent `z_occ ∈ ℝ²⁵⁶` is concatenated with the robot state
 
 ## Demo
 
-### Robot Navigating in PyBullet Simulation
-![Simulation Demo](figures/sim.gif)
+### TurtleBot2 Navigating Through Crowd — PyBullet Simulation
+![Simulation Demo](results/figures/simulation_demo.jpg)
 
-> The TurtleBot2 robot (orange) navigates from its start position to the goal while avoiding dynamic pedestrians and static obstacles in real-time.
+> The TurtleBot2 robot (white, center) navigates toward the red goal marker while dynamically avoiding 6 pedestrians (colored figures) and static box obstacles. The green arrow shows the robot's heading direction. Humans are controlled by ORCA and move independently.
 
 ---
 

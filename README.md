@@ -52,7 +52,19 @@ The inferred latent `z_occ ∈ ℝ²⁵⁶` is concatenated with the robot state
 
 ---
 
+## Demo
+
+### Robot Navigating in PyBullet Simulation
+![Simulation Demo](figures/sim.gif)
+
+> The TurtleBot2 robot (orange) navigates from its start position to the goal while avoiding dynamic pedestrians and static obstacles in real-time.
+
+---
+
 ## Results
+
+### Navigation Scenario — Circle Crossing
+![Navigation Scenario](results/figures/navigation_scenario.jpg)
 
 ### Quantitative Comparison
 ![Results](results/figures/training_results_chart.jpg)
@@ -83,6 +95,14 @@ The inferred latent `z_occ ∈ ℝ²⁵⁶` is concatenated with the robot state
 | **+ Both (HEIGHT-O)** | **89.0%** | **11.0%** |
 
 > Full evaluation logs: [`results/test_logs/stage2_final_results.txt`](results/test_logs/stage2_final_results.txt)
+
+### Training Curves (Real Data from `progress.csv`)
+![Training Curves](results/figures/stage2_training_curves.png)
+
+The reward curve shows three clear training phases:
+- **0–50M steps**: Rapid initial learning, reward rises from −8 to ~10
+- **50–200M steps**: Steady improvement, reward reaches ~18
+- **200M+ steps**: Fine-tuning convergence (resumed from Stage 1 checkpoint), reward stabilizes at ~18
 
 ---
 

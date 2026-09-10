@@ -14,10 +14,21 @@
 
 This project implements **HEIGHT-O**, an occlusion-aware social robot navigation system that uses deep reinforcement learning to navigate a TurtleBot2 robot safely through dense crowds of dynamic pedestrians and static obstacles.
 
-The system extends the [HEIGHT](https://github.com/Shuijing725/CrowdNav_HEIGHT) framework with two novel components:
+The system integrates two previously published components into the
+[HEIGHT](https://github.com/Shuijing725/CrowdNav_HEIGHT) framework:
 
-1. **Trajectory Intention Prediction** — anticipates future human motion paths to enable proactive collision avoidance
-2. **VAE-Based Occlusion Inference** — infers the presence of hidden pedestrians (occluded by obstacles or other humans) from partial LiDAR observations using knowledge distillation
+1. **Trajectory Intention Prediction** — anticipates future human motion paths to enable
+   proactive collision avoidance. Follows the intention-aware formulation of
+   [Liu et al., ICRA 2023](https://arxiv.org/abs/2203.01821).
+2. **VAE-Based Occlusion Inference** — infers the presence of hidden pedestrians
+   (occluded by obstacles or other humans) from partial LiDAR observations via knowledge
+   distillation. Follows *People as Sensors*,
+   [Mun et al., ICRA 2023](https://arxiv.org/abs/2210.00552).
+
+**The contribution of this work is the integration**, not the individual components: both
+are drawn from prior work, and this report documents combining them within HEIGHT's
+heterogeneous-graph architecture and evaluating the result under a stricter protocol than
+is common in this literature (see [Honest Reporting](#honest-reporting)).
 
 Trained for **300 million environment timesteps** using **Proximal Policy Optimization (PPO)** in a 3D PyBullet simulation. Evaluated over **3,500 test episodes across three independent training seeds**, the system reaches **88.08 ± 0.49% success rate**.
 

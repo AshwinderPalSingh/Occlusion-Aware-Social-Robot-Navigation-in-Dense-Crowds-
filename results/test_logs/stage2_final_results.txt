@@ -1,26 +1,51 @@
 === HEIGHT-O Stage 2 Evaluation Results ===
-Checkpoint: 357141 (300M environment timesteps)
-Test Episodes: 500
-Scenario: Circle Crossing (5-9 humans, 8-12 obstacles)
 
---- Summary Metrics ---
-Success Rate:       89.0%
-Collision Rate:     11.0%
-  - Human:          9.0%
-  - Obstacle:       2.0%
+Checkpoint: 357141 (300M environment timesteps)
+Scenario:   Circle Crossing (HEIGHT released config, unmodified)
+Protocol:   3,500 test episodes per seed, 3 independent training seeds
+
+--- Summary Metrics (mean +/- SD over 3 training seeds) ---
+Success Rate:       88.08% +/- 0.49%
+  seed 1:           88.54%
+  seed 2:           88.11%
+  seed 3:           87.57%
+Collision Rate:     ~11.9%
+  - Human:          ~10%
+  - Obstacle:       ~2%
   - Wall:           0.0%
 Timeout Rate:       0.0%
-Average Nav. Time:  18.01 seconds
-Avg. Path Length:   10.34 meters
-Avg. Intrusion Ratio: 5.15%
+Average Nav. Time:  ~18.1 seconds
 
---- Baseline Comparison ---
-ORCA:        65% success, 24% collision
-SARL:        72% success, 19% collision
-HEIGHT:      85% success, 12% collision
-HEIGHT-O:    89% success, 11% collision (OURS)
+--- Scope ---
+This is a systems/implementation report. NO comparative claim is made against prior
+methods. Baseline numbers from other papers are deliberately NOT reproduced here: they
+were measured in different environments, at different sample sizes, and under different
+evaluation protocols, so tabulating them alongside these numbers would be misleading.
+
+--- IMPORTANT: privileged information ---
+The intention-prediction module runs with sim.predict_method = 'truth', which
+forward-simulates each pedestrian's ACTUAL ORCA policy and goal to obtain their true
+future trajectory. This is ground-truth simulator state that no deployed robot could
+have. These results are therefore an ORACLE UPPER BOUND on what a learned predictor
+could achieve, not a deployable-system result.
+
+The occlusion module was audited separately and is clean: the frozen Label_VAE encodes
+ground-truth occupancy only during training (latent distillation loss); at inference
+only the Sensor_VAE, which sees the partial LiDAR grid, feeds the policy.
+
+--- Evaluation protocol note ---
+At n=500 (the common sample size in this literature) a 2 percentage-point difference in
+success rate has ~19% statistical power. n=3500 with 3 training seeds was used here to
+avoid drawing conclusions from differences that cannot be distinguished from noise.
 
 --- Training Info ---
-Total Timesteps:    300,000,000
+Total Timesteps:    300,000,000 (+50M fine-tune)
 Final Update:       357,141
+Parallel Envs:      28
 FPS (DGX A100):     ~815
+
+--- Superseded ---
+An earlier revision of this file reported 89.0% at n=500 alongside baseline comparisons
+(ORCA / SARL / HEIGHT / PaS-CrowdNav). Those figures have been withdrawn: the sample size
+was insufficient to support the comparisons drawn, and the baseline numbers were not
+measured under this environment or protocol.

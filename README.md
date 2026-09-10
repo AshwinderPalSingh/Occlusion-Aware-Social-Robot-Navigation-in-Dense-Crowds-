@@ -19,7 +19,9 @@ The system extends the [HEIGHT](https://github.com/Shuijing725/CrowdNav_HEIGHT) 
 1. **Trajectory Intention Prediction** — anticipates future human motion paths to enable proactive collision avoidance
 2. **VAE-Based Occlusion Inference** — infers the presence of hidden pedestrians (occluded by obstacles or other humans) from partial LiDAR observations using knowledge distillation
 
-Trained for **300 million environment timesteps** using **Proximal Policy Optimization (PPO)** in a 3D PyBullet simulation, the final model achieves **89% success rate** and **0% wall collision rate**.
+Trained for **300 million environment timesteps** using **Proximal Policy Optimization (PPO)** in a 3D PyBullet simulation. Evaluated over **3,500 test episodes across three independent training seeds**, the system reaches **88.08 ± 0.49% success rate**.
+
+> **Scope of this report.** This is a *systems and implementation* report describing an integrated occlusion-aware navigation pipeline. It makes **no comparative performance claim** against prior methods. See [Honest Reporting](#honest-reporting) for the evaluation protocol and its limitations.
 
 ---
 
@@ -66,35 +68,27 @@ The inferred latent `z_occ ∈ ℝ²⁵⁶` is concatenated with the robot state
 ### Navigation Scenario — Circle Crossing
 ![Navigation Scenario](results/figures/navigation_scenario.jpg)
 
-### Quantitative Comparison
-![Results](results/figures/training_results_chart.jpg)
+### Evaluation Results
 
-| Method | Success ↑ | Collision ↓ | Timeout ↓ | Nav. Time |
-|--------|-----------|-------------|-----------|-----------|
-| PaS-CrowdNav | 94.0% | 6.0% | 0.0% | 12.71s |
-| HEIGHT (Baseline) | 87.0% | 13.0% | 0.0% | 18.32s |
-| **HEIGHT-O (Ours)** | **89.0%** | **11.0%** | **0.0%** | **18.01s** |
+Evaluated over **3,500 test episodes** per seed, across **three independent training runs**:
 
-> **Note:** PaS-CrowdNav operates in a simpler 2D holonomic environment. HEIGHT and HEIGHT-O operate in a more challenging 3D differential-drive environment with random static obstacles.
+| Seed | Success | Collision | Timeout |
+|------|---------|-----------|---------|
+| 1 | 88.54% | 11.5% | 0.0% |
+| 2 | 88.11% | 11.9% | 0.0% |
+| 3 | 87.57% | 12.4% | 0.0% |
+| **Mean ± SD** | **88.08 ± 0.49%** | **11.9%** | **0.0%** |
 
+> **No comparative claim is made.** Numbers from other papers are not reproduced here
+> because they were measured in different environments, at different sample sizes, and
+> with different evaluation protocols. Placing them in the same table would be misleading.
 
-### Collision Breakdown (HEIGHT-O)
+### Collision Breakdown
 | Type | Rate |
 |------|------|
-| Human collision | 9% |
-| Obstacle collision | 2% |
-| Wall collision | **0%** ✅ |
-
-### Ablation Study
-
-| Configuration | Success | Collision |
-|---|---|---|
-| HEIGHT (base) | 82.0% | 14.0% |
-| + Intention prediction | 85.0% | 12.0% |
-| + Occlusion inference only | 86.0% | 12.0% |
-| **+ Both (HEIGHT-O)** | **89.0%** | **11.0%** |
-
-> Full evaluation logs: [`results/test_logs/stage2_final_results.txt`](results/test_logs/stage2_final_results.txt)
+| Human collision | ~10% |
+| Obstacle collision | ~2% |
+| Wall collision | **0%** |
 
 ### Training Curves (Real Data from `progress.csv`)
 ![Training Curves](results/figures/stage2_training_curves.png)
@@ -105,6 +99,67 @@ The reward curve shows three clear training phases:
 - **200M+ steps**: Fine-tuning convergence (resumed from Stage 1 checkpoint), reward stabilizes at ~18
 
 ---
+
+---
+
+## Honest Reporting
+
+This section documents the evaluation protocol and its known limitations, so that the
+numbers above are interpreted correctly.
+
+### The intention-prediction module uses privileged information
+
+The trajectory prediction component is configured with `sim.predict_method = 'truth'`.
+This **forward-simulates each pedestrian's actual ORCA policy and goal** to obtain their
+true future trajectory over a 5-step (0.5 s) horizon.
+
+**This is ground-truth simulator state, not a prediction.** No deployed robot could
+obtain it. Every result in this repository that uses this setting is therefore an
+**oracle upper bound** on what a learned predictor could achieve — not a deployable
+system result.
+
+A learned predictor (Gumbel Social Transformer, `sim.predict_method = 'inferred'`) is
+scaffolded in `training/prediction/gst_predictor.py` but is **not** the configuration
+these numbers were produced with. Substituting it can only lower performance, since a
+learned predictor carries error that the oracle does not.
+
+### The occlusion module does NOT use privileged information
+
+For completeness, the PaS-VAE occlusion pipeline was audited and is clean. The frozen
+`Label_VAE` encodes ground-truth occupancy **only during training**, to supply a latent
+distillation loss. At inference, only the `Sensor_VAE` — which sees the partial LiDAR
+grid — feeds the policy. Verified in `training/networks/selfAttn_srnn_merge.py`.
+
+### Evaluation protocol
+
+| | This report | Common practice in this literature |
+|---|---|---|
+| Test episodes | **3,500** | 500 |
+| Training runs | **3 independent seeds** | 1 |
+| Reported spread | **± SD across seeds** | point estimate |
+
+At n=500, a 2 percentage-point difference in success rate has roughly **19% statistical
+power** — meaning most such differences are indistinguishable from noise. The protocol
+here was chosen to avoid that failure mode.
+
+### Environment
+
+The simulation configuration is taken **unmodified** from the released
+[HEIGHT](https://github.com/Shuijing725/CrowdNav_HEIGHT) codebase: 9×9 m bordered arena
+(`sim.arena_size = 4.5`), 7±2 ORCA pedestrians, 10±2 static rectangular obstacles,
+`robot.visible_prob = 0.2` (80% of pedestrians do not react to the robot), 360° camera
+FOV, Δt = 0.1 s, 50 s episode limit.
+
+Note that HEIGHT's paper text describes a 12 m × 12 m arena and a 49.1 s limit, while
+their released configuration file specifies 9×9 m and 50 s. This report uses the released
+configuration.
+
+### Superseded results
+
+Earlier revisions of this repository reported results measured at n=500 alongside
+baseline numbers taken from other papers. Those comparisons have been removed: the
+sample size was insufficient to distinguish the effects claimed, and the baseline numbers
+were not measured under this environment or protocol.
 
 ## Environment Setup
 
@@ -226,6 +281,8 @@ PYTHONPATH=. python3 test_more_obs.py
 | Robot Node RNN Size | 256 |
 | Occlusion Latent Size | 256 |
 | PaS Distillation Coeff. | 1.0 |
+| Prediction horizon | 5 steps (0.5 s) |
+| **`sim.predict_method`** | **`'truth'` — ORACLE, see [Honest Reporting](#honest-reporting)** |
 
 ---
 
@@ -248,7 +305,7 @@ PYTHONPATH=. python3 test_more_obs.py
 - **Heterogeneous Graph**: Unified attention over robots, humans, and obstacles as distinct node types — handles variable numbers of agents
 - **Knowledge Distillation**: Sensor-VAE learns to infer complete scene occupancy from partial LiDAR data by mimicking the frozen Label-VAE's latent distribution
 - **Seamless Integration**: Occlusion latent fused into robot node embedding — no changes needed to the attention mechanism
-- **0% Wall Collision**: Direct evidence that occlusion inference correctly predicts wall proximity even when walls are obscured by nearby obstacles
+- **0% Wall Collision**: No wall collisions were observed across 3,500 test episodes. Note this is an observation, not an ablation — it has not been isolated to the occlusion module.
 
 ---
 

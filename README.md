@@ -50,9 +50,9 @@ The pipeline processes sensor observations through three parallel streams:
 ![Heterogeneous Graph](results/figures/heterogeneous_graph.jpg)
 
 The graph contains three node types:
-- 🔵 **Robot node**: `[px, py, gx, gy, vx, vy, θ]`
-- 🟢 **Human nodes**: `[px, py, vx, vy]` + predicted future positions (5-step horizon)
-- ⬜ **Obstacle nodes**: 4 corner vertex coordinates
+- **Robot node**: `[px, py, gx, gy, θ]` (5 values; 261-d after the occlusion latent is concatenated)
+- **Human nodes**: `[px, py, vx, vy]` + five predicted future positions (14 values in total)
+- **Obstacle nodes**: four corner vertex coordinates
 
 ### VAE Occlusion Inference Module
 ![VAE Architecture](results/figures/vae_occlusion_arch.jpg)
@@ -81,25 +81,32 @@ The inferred latent `z_occ ∈ ℝ²⁵⁶` is concatenated with the robot state
 
 ### Evaluation Results
 
-Evaluated over **3,500 test episodes** per seed, across **three independent training runs**:
+Evaluated over **3,500 test episodes** per seed, across **three training seeds**:
 
 | Seed | Success | Collision | Timeout |
 |------|---------|-----------|---------|
-| 1 | 88.54% | 11.5% | 0.0% |
-| 2 | 88.11% | 11.9% | 0.0% |
-| 3 | 87.57% | 12.4% | 0.0% |
-| **Mean ± SD** | **88.08 ± 0.49%** | **11.9%** | **0.0%** |
+| 1 | 88.54% | 11.20% | 0.26% |
+| 2 | 88.11% | 11.74% | 0.14% |
+| 3 | 87.57% | 12.31% | 0.11% |
+| **Mean ± SD** | **88.08 ± 0.49%** | **11.75%** | **0.17%** |
+
+The three seeds share a single initialisation and differ only in a final 50M-step
+fine-tune, so the standard deviation describes that segment rather than the variance of
+the whole training recipe.
 
 > **No comparative claim is made.** Numbers from other papers are not reproduced here
 > because they were measured in different environments, at different sample sizes, and
 > with different evaluation protocols. Placing them in the same table would be misleading.
 
 ### Collision Breakdown
+
+Averaged over the three seeds, n = 3,500 episodes each:
+
 | Type | Rate |
 |------|------|
-| Human collision | ~10% |
-| Obstacle collision | ~2% |
-| Wall collision | **0%** |
+| Human collision | 9.74% |
+| Obstacle collision | 1.86% |
+| Wall collision | 0.15% |
 
 ### Training Curves (Real Data from `progress.csv`)
 ![Training Curves](results/figures/stage2_training_curves.png)
@@ -146,10 +153,10 @@ grid — feeds the policy. Verified in `training/networks/selfAttn_srnn_merge.py
 | | This report | Common practice in this literature |
 |---|---|---|
 | Test episodes | **3,500** | 500 |
-| Training runs | **3 independent seeds** | 1 |
+| Training runs | **3 seeds** (shared initialisation) | 1 |
 | Reported spread | **± SD across seeds** | point estimate |
 
-At n=500, a 2 percentage-point difference in success rate has roughly **19% statistical
+At n=500, a 2 percentage-point difference in success rate has roughly **17% statistical
 power** — meaning most such differences are indistinguishable from noise. The protocol
 here was chosen to avoid that failure mode.
 
@@ -157,7 +164,8 @@ here was chosen to avoid that failure mode.
 
 The simulation configuration is taken **unmodified** from the released
 [HEIGHT](https://github.com/Shuijing725/CrowdNav_HEIGHT) codebase: 9×9 m bordered arena
-(`sim.arena_size = 4.5`), 7±2 ORCA pedestrians, 10±2 static rectangular obstacles,
+(`sim.arena_size = 4.5`), 7±2 moving ORCA pedestrians plus 0–2 standing ones, 10±2
+static rectangular obstacles,
 `robot.visible_prob = 0.2` (80% of pedestrians do not react to the robot), 360° camera
 FOV, Δt = 0.1 s, 50 s episode limit.
 
@@ -217,7 +225,7 @@ PYTHONPATH=. python3 pretrain_occlusion_vae.py
 PYTHONPATH=. python3 train.py
 ```
 
-Training runs for **300 million timesteps** (~34 hours on DGX A100 with 28 parallel envs at ~815 FPS).
+Training ran in segments: 76M steps from scratch, then a relaunch from that checkpoint (which reset the optimizer, learning-rate schedule and step counter) for a full 300M-step schedule, then a 50M-step fine-tune per seed — approximately 426M environment steps in total. The final fine-tune takes roughly 17 hours on an A100 with 28 parallel environments at ~829 FPS.
 
 ---
 

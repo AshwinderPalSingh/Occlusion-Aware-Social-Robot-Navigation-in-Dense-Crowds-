@@ -116,7 +116,8 @@ def main():
         config.ppo.entropy_coef,
         lr=config.training.lr,
         eps=config.training.eps,
-        max_grad_norm=config.training.max_grad_norm
+        max_grad_norm=config.training.max_grad_norm,
+        pas_coef=config.pas.PaS_coef if getattr(config.sim, 'occlusion_method', 'none') == 'vae' else 0.0
     )
 
     # Start training loop
@@ -138,7 +139,16 @@ def main():
     if config.training.resume != 'none' and os.path.exists(config.training.load_path.split(".")[0] + "_checkpoint.pt"):
         load_path = config.training.load_path.split(".")[0] + "_checkpoint.pt"
         load_checkpoint = torch.load(load_path)
-        agent.optimizer.load_state_dict(load_checkpoint["optimizer_data_dict"])
+        # Stage 3: optimizer_data_dict may be None (from migrate_weights_stage3.py)
+        # or have a different param count — handle gracefully
+        if load_checkpoint.get("optimizer_data_dict") is not None:
+            try:
+                agent.optimizer.load_state_dict(load_checkpoint["optimizer_data_dict"])
+                print("Loaded optimizer state successfully")
+            except (ValueError, RuntimeError) as e:
+                print(f"WARNING: Could not load optimizer state ({e}). Re-initializing optimizer.")
+        else:
+            print("No optimizer state in checkpoint — using fresh optimizer")
         start_epoch = load_checkpoint["epoch"]
         time_diff = load_checkpoint["time_diff"]
 

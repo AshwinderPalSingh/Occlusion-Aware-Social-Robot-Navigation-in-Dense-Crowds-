@@ -1,7 +1,5 @@
 # Occlusion-Aware Social Robot Navigation in Dense Crowds
 
-**HEIGHT-O: Heterogeneous Environment-aware Intention-based Graph with Occlusion**
-
 > UCS 760 — Reinforcement Learning Lab Project  
 > Ashwinder Pal Singh | Roll No.: 102309076  
 > B.E. Mechatronics Engineering, 7th Semester  
@@ -12,338 +10,225 @@
 
 ## Overview
 
-This project implements **HEIGHT-O**, an occlusion-aware social robot navigation system that uses deep reinforcement learning to navigate a TurtleBot2 robot safely through dense crowds of dynamic pedestrians and static obstacles.
+This repository holds the code, the exact run configurations and the evaluation logs behind
+a report on integrating two published modules into
+[HEIGHT](https://github.com/Shuijing725/CrowdNav_HEIGHT), a heterogeneous graph-transformer
+policy for robot navigation among pedestrians and static obstacles:
 
-The system integrates two previously published components into the
-[HEIGHT](https://github.com/Shuijing725/CrowdNav_HEIGHT) framework:
-
-1. **Trajectory Intention Prediction** — anticipates future human motion paths to enable
-   proactive collision avoidance. Follows the intention-aware formulation of
-   [Liu et al., ICRA 2023](https://arxiv.org/abs/2203.01821).
-2. **VAE-Based Occlusion Inference** — infers the presence of hidden pedestrians
-   (occluded by obstacles or other humans) from partial LiDAR observations via knowledge
-   distillation. Follows *People as Sensors*,
+1. **Trajectory intention prediction**, after
+   [Liu et al., ICRA 2023](https://arxiv.org/abs/2203.01821). Here the five-step forecast of
+   each pedestrian is computed by the simulator, which makes it privileged information (see
+   below).
+2. **Occlusion inference** with a distilled variational encoder, after *People as Sensors*,
    [Mun et al., ICRA 2023](https://arxiv.org/abs/2210.00552).
 
-**The contribution of this work is the integration**, not the individual components: both
-are drawn from prior work, and this report documents combining them within HEIGHT's
-heterogeneous-graph architecture and evaluating the result under a stricter protocol than
-is common in this literature (see [Honest Reporting](#honest-reporting)).
+Both modules come from prior work; the integration and its evaluation are what this
+repository documents. Every number below is measured over 3,500 test episodes.
 
-Trained for **300 million environment timesteps** using **Proximal Policy Optimization (PPO)** in a 3D PyBullet simulation. Evaluated over **3,500 test episodes across three independent training seeds**, the system reaches **88.08 ± 0.49% success rate**.
+## What the evaluation shows
 
-> **Scope of this report.** This is a *systems and implementation* report describing an integrated occlusion-aware navigation pipeline. It makes **no comparative performance claim** against prior methods. See [Honest Reporting](#honest-reporting) for the evaluation protocol and its limitations.
+| Question | Result |
+| --- | --- |
+| Does the integrated system succeed more often? | 88.08 +/- 0.49 % over three seeds against 88.03 % for HEIGHT's released checkpoint (+0.05 points, t = 0.17) |
+| Does better perception help? | Perfect pedestrian state gives no gain at the default 25 m sensing range (3,099 vs 3,099 successes); +3.03 points at 3 m |
+| What does move success? | Raising `robot.visible_prob` from 0.2 to 1.0 raises it from 88.54 % to 98.77 % (HEIGHT: 88.03 % to 98.89 %) |
+| Who does the robot collide with? | 335 of 336 pedestrian collisions involve a pedestrian that cannot perceive the robot (base rate 82.4 %) |
+| Does it keep more distance from people? | With the simulator's forecasts, 16 % fewer personal-space intrusions than the released checkpoint and 11.4 % fewer than HEIGHT fine-tuned to 350 M steps |
+| And without the forecasts? | Retrained for 350 M steps without them, success is unchanged (87.03, 88.60 and 88.57 %) and the intrusion reduction is not significant (p = 0.13, 0.37, 0.51) |
 
----
+Training the HEIGHT baseline 75 % longer (to 350 M steps) changes its success by -0.26
+points (p = 0.74), so training length does not explain the success result either.
 
 ## Architecture
 
-### Full System Pipeline
-![System Architecture](results/figures/system_architecture.jpg)
+![System pipeline](results/figures/architecture.png)
 
-The pipeline processes sensor observations through three parallel streams:
-- **Graph stream**: heterogeneous graph with multi-head self-attention over human and obstacle nodes
-- **Occlusion stream**: Sensor-VAE encoding the partial LiDAR occupancy grid into a 256-dim latent vector
-- **SRNN**: temporal integration of attended graph features via a recurrent neural network
+- **Robot state** `[px, py, gx, gy, theta]` (5 values).
+- **Each detected pedestrian** `[px, py, vx, vy]` plus five predicted positions (14 values).
+- **Lidar scan**, 180 rays, returning static obstacles only (pedestrians excluded), encoded
+  by HEIGHT's 1D CNN. This is the only way obstacles reach the policy.
+- **Occupancy grid**, robot-centred, 10 x 10 m at 0.1 m cells, of the pedestrians visible to
+  a 360 degree ray scan, with cells hidden behind the first object on each ray marked
+  unknown. The **Sensor_VAE** (student) encodes it into a 256-dimensional latent that is
+  appended to the robot state, giving a 261-dimensional robot node.
+- The **Label_VAE** (teacher) is pretrained on ground-truth grids and frozen; during
+  training it supplies the target of an MSE distillation loss (coefficient 1.0). It is
+  never used at test time.
+- HEIGHT's attention layers and recurrent robot-node network are unchanged and select one
+  of nine `(delta v, delta omega)` acceleration actions.
 
-### Heterogeneous Graph
-![Heterogeneous Graph](results/figures/heterogeneous_graph.jpg)
+### The forecasts are privileged
 
-The graph contains three node types:
-- **Robot node**: `[px, py, gx, gy, θ]` (5 values; 261-d after the occlusion latent is concatenated)
-- **Human nodes**: `[px, py, vx, vy]` + five predicted future positions (14 values in total)
-- **Obstacle nodes**: four corner vertex coordinates
+`sim.predict_method = 'truth'` rolls each pedestrian's own ORCA policy and goal forward
+five steps (0.5 s) inside the simulator, without the robot, so the forecast is exact only
+for pedestrians that ignore the robot. No deployed robot has this, and every result that
+uses it is oracle-assisted. The `exp_nopredict_s*` runs repeat the system with
+`sim.predict_method = 'none'`. A learned predictor is scaffolded in
+`training/prediction/` but was not used for any result here.
 
-### VAE Occlusion Inference Module
-![VAE Architecture](results/figures/vae_occlusion_arch.jpg)
+## Repository layout
 
-Two VAEs are trained:
-- **Label-VAE** (frozen teacher): trained on complete ground-truth occupancy grids
-- **Sensor-VAE** (trainable student): trained on partial LiDAR grids with KL distillation loss to match the Label-VAE's latent space
+```
+crowd_nav/configs/config.py   configuration of the reported system (the seed-1 fine-tune)
+configs/runs/<run>/config.py  configuration snapshot of every run behind the report
+crowd_sim/                    HEIGHT's PyBullet environment, with the occupancy grid and forecasts
+training/                     policy network, PPO, occlusion VAEs, evaluation harness
+train.py, test.py             training and evaluation entry points
+collect_occlusion_data.py     collects occupancy grids from random-action episodes
+pretrain_occlusion_vae.py     pretrains the Label_VAE teacher
+set_config_value.py           changes one key in a configuration snapshot
+results/logs/                 primary evaluation and training logs, per-episode JSON files
+results/figures/              architecture figure and training curves
+results/superseded/           early n = 500 outputs, kept for the record only
+CHECKPOINTS.md                the checkpoint behind each result, with its MD5
+figures/                      HEIGHT's own demo animations, from the original repository
+```
 
-The inferred latent `z_occ ∈ ℝ²⁵⁶` is concatenated with the robot state before the graph attention computation.
+## Runs
 
----
+| Run | What it is | Environment steps |
+| --- | --- | --- |
+| `stage2_HEIGHT_intention_occlusion` | our system from scratch: 76 M steps, then a relaunch that reset the optimizer, learning-rate schedule and step counter and ran a full 300 M-step schedule | about 376 M |
+| `exp_nospeak_s1`, `_s2`, `_s3` | one 50 M-step fine-tune of that checkpoint per seed; these are the three seeds above | about 426 M in total each |
+| `exp_oracle_s1` | seed 1 evaluated with perfect pedestrian state (`sim.oracle_visibility = True`) | evaluation only |
+| `exp_heightpub` | HEIGHT's released checkpoint evaluated in this codebase, our modules disabled | 199.8 M (released) |
+| `exp_heightft` | HEIGHT's released checkpoint fine-tuned for a further 150 M steps | 350 M |
+| `exp_nopredict_s1`, `_s2`, `_s3` | our system retrained from scratch with `sim.predict_method = 'none'` | 350 M each |
 
-## Demo
+The three seeds share the Stage-2 initialisation and differ only in the final fine-tune,
+so their spread describes that segment, not the whole training recipe. The Stage-2
+snapshot is the configuration as last written in that run; `stage2_train_log.txt` shows the
+update counter across its restarts. The reciprocity sweep and the sensing-range test
+re-evaluate the seed-1 checkpoint with one key changed in a copy of its snapshot:
+`robot.visible_prob` for the sweep, `lidar.sensor_range` and `sim.oracle_visibility` for the
+range test.
 
-### TurtleBot2 Navigating Through Crowd — PyBullet Simulation
-![Simulation Demo](results/figures/simulation_demo.jpg)
+## Logs
 
-> The TurtleBot2 robot (white, center) navigates toward the red goal marker while dynamically avoiding 6 pedestrians (colored figures) and static box obstacles. The green arrow shows the robot's heading direction. Humans are controlled by ORCA and move independently.
+| Result | Files in `results/logs/` |
+| --- | --- |
+| Success and collision rates of the three seeds and of HEIGHT | `eval_exp_nospeak_s{1,2,3}.log`, `eval_heightpub.log` |
+| Perception at 25 m and 3 m | `rc_rc25_{occl,oracle}.log`, `rc_rc3_{occl,oracle}.log` |
+| Reciprocity sweep | `re_vp{02,04,06,08,10}_{ours,height}.log` |
+| n = 1,000 pilot at the default setting | `rp_vp02_{ours,height}.log` |
+| Collision analysis (336 pedestrian collisions) | `collision_taxonomy_n3500.log` |
+| Intrusions | `intrusion_test_re_vp02_{ours,height}.json`, `re_vp02_{ours,height}.log` |
+| HEIGHT fine-tuned to 350 M | `eval_exp_heightft.log`, `intrusion_test_exp_heightft.json`, `exp_heightft_train.log` |
+| Retrain without forecasts | `eval_exp_nopredict_s{1,2,3}.log`, `intrusion_test_exp_nopredict_s{1,2,3}.json`, `exp_nopredict_s{1,2,3}_train.log` |
+| Training history | `stage2_1_collect.log`, `stage2_2_pretrain.log`, `stage2_3_train.log`, `stage2_train_log.txt`, `exp_nospeak_s{1,2,3}_train.log` |
 
----
+Each evaluation log ends with a summary of success, collision and timeout counts. The
+JSON files hold one intrusion ratio per episode, so the intrusion comparisons can be
+recomputed without a GPU:
 
-## Results
+```python
+import json
+ours   = json.load(open('results/logs/intrusion_test_re_vp02_ours.json'))['too_close_ratios']
+height = json.load(open('results/logs/intrusion_test_re_vp02_height.json'))['too_close_ratios']
+# Welch's t-test on these two arrays gives the 16 % comparison
+```
 
-### Navigation Scenario — Circle Crossing
-![Navigation Scenario](results/figures/navigation_scenario.jpg)
+`MANIFEST.md5` lists a checksum for every log. All are unchanged copies of the archived
+logs; only `collision_taxonomy_n3500.log` was renamed. Two things to know when reading
+them:
 
-### Evaluation Results
+- The **path length** in the summaries is not a real distance (see Known issues); the
+  report does not use it.
+- In `collision_taxonomy_n3500.log`, the heading-change percentages in section F are shares
+  of the 133 collisions in which a heading change was detected. As shares of all 336
+  collisions they are 7.1, 15.5, 20.8 and 23.8 % within 0.5, 1, 2 and 3 s.
 
-Evaluated over **3,500 test episodes** per seed, across **three training seeds**:
+## Reproducing
 
-| Seed | Success | Collision | Timeout |
-|------|---------|-----------|---------|
-| 1 | 88.54% | 11.20% | 0.26% |
-| 2 | 88.11% | 11.74% | 0.14% |
-| 3 | 87.57% | 12.31% | 0.11% |
-| **Mean ± SD** | **88.08 ± 0.49%** | **11.75%** | **0.17%** |
-
-The three seeds share a single initialisation and differ only in a final 50M-step
-fine-tune, so the standard deviation describes that segment rather than the variance of
-the whole training recipe.
-
-> **No comparative claim is made.** Numbers from other papers are not reproduced here
-> because they were measured in different environments, at different sample sizes, and
-> with different evaluation protocols. Placing them in the same table would be misleading.
-
-### Collision Breakdown
-
-Averaged over the three seeds, n = 3,500 episodes each:
-
-| Type | Rate |
-|------|------|
-| Human collision | 9.74% |
-| Obstacle collision | 1.86% |
-| Wall collision | 0.15% |
-
-### Training Curves (Real Data from `progress.csv`)
-![Training Curves](results/figures/stage2_training_curves.png)
-
-The reward curve shows three clear training phases:
-- **0–50M steps**: Rapid initial learning, reward rises from −8 to ~10
-- **50–200M steps**: Steady improvement, reward reaches ~18
-- **200M+ steps**: Fine-tuning convergence (resumed from Stage 1 checkpoint), reward stabilizes at ~18
-
----
-
----
-
-## Honest Reporting
-
-This section documents the evaluation protocol and its known limitations, so that the
-numbers above are interpreted correctly.
-
-### The intention-prediction module uses privileged information
-
-The trajectory prediction component is configured with `sim.predict_method = 'truth'`.
-This **forward-simulates each pedestrian's actual ORCA policy and goal** to obtain their
-true future trajectory over a 5-step (0.5 s) horizon.
-
-**This is ground-truth simulator state, not a prediction.** No deployed robot could
-obtain it. Every result in this repository that uses this setting is therefore an
-**oracle upper bound** on what a learned predictor could achieve — not a deployable
-system result.
-
-A learned predictor (Gumbel Social Transformer, `sim.predict_method = 'inferred'`) is
-scaffolded in `training/prediction/gst_predictor.py` but is **not** the configuration
-these numbers were produced with. Substituting it can only lower performance, since a
-learned predictor carries error that the oracle does not.
-
-### The occlusion module does NOT use privileged information
-
-For completeness, the PaS-VAE occlusion pipeline was audited and is clean. The frozen
-`Label_VAE` encodes ground-truth occupancy **only during training**, to supply a latent
-distillation loss. At inference, only the `Sensor_VAE` — which sees the partial LiDAR
-grid — feeds the policy. Verified in `training/networks/selfAttn_srnn_merge.py`.
-
-### Evaluation protocol
-
-| | This report | Common practice in this literature |
-|---|---|---|
-| Test episodes | **3,500** | 500 |
-| Training runs | **3 seeds** (shared initialisation) | 1 |
-| Reported spread | **± SD across seeds** | point estimate |
-
-At n=500, a 2 percentage-point difference in success rate has roughly **17% statistical
-power** — meaning most such differences are indistinguishable from noise. The protocol
-here was chosen to avoid that failure mode.
-
-### Environment
-
-The simulation configuration is taken **unmodified** from the released
-[HEIGHT](https://github.com/Shuijing725/CrowdNav_HEIGHT) codebase: 9×9 m bordered arena
-(`sim.arena_size = 4.5`), 7±2 moving ORCA pedestrians plus 0–2 standing ones, 10±2
-static rectangular obstacles,
-`robot.visible_prob = 0.2` (80% of pedestrians do not react to the robot), 360° camera
-FOV, Δt = 0.1 s, 50 s episode limit.
-
-Note that HEIGHT's paper text describes a 12 m × 12 m arena and a 49.1 s limit, while
-their released configuration file specifies 9×9 m and 50 s. This report uses the released
-configuration.
-
-### Superseded results
-
-Earlier revisions of this repository reported results measured at n=500 alongside
-baseline numbers taken from other papers. Those comparisons have been removed: the
-sample size was insufficient to distinguish the effects claimed, and the baseline numbers
-were not measured under this environment or protocol.
-
-## Environment Setup
+Setup, as for HEIGHT:
 
 ```bash
-# Clone the repository
-git clone https://github.com/AshwinderPalSingh/Occlusion-Aware-Social-Robot-Navigation-in-Dense-Crowds-.git
-cd Occlusion-Aware-Social-Robot-Navigation-in-Dense-Crowds-
-
-# Create virtual environment
-python3 -m venv venv
-source venv/bin/activate
-
-# Install dependencies
+python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
-
-# Install Python-RVO2 (ORCA library)
 pip install cython
 git clone https://github.com/sybrenstuvel/Python-RVO2.git
-cd Python-RVO2
-python setup.py build
-python setup.py install
-cd ..
+cd Python-RVO2 && python setup.py build && python setup.py install && cd ..
 ```
 
----
+1. **Collect occupancy grids** from random-action episodes (1,000 for training, 100 for
+   validation): `python3 collect_occlusion_data.py`
+2. **Pretrain the teacher** for 300 epochs, which writes
+   `data/occlusion_vae/label_vae_ckpt/label_vae_weight_300.pth`:
+   `python3 pretrain_occlusion_vae.py`
+3. **Train** with `python3 train.py`, which reads `crowd_nav/configs/config.py`. The file
+   shipped is the seed-1 fine-tune, which resumes from
+   `data/exp_nospeak_s1/checkpoints/000000.pt`. To train from scratch instead, set
+   `training.resume = 'none'`, and set `training.num_env_steps` and `training.output_dir`
+   for the run you want. Training writes a copy of its configuration into the run
+   directory.
+4. **Evaluate** a run directory with
+   `python3 test.py --model_dir data/<run> --test_model <checkpoint>.pt`. Evaluation uses
+   the configuration stored in that directory and runs `env.test_size` episodes (3,500 in
+   every snapshot here).
 
-## Training
+Training used 28 parallel environments and 30 steps per rollout (840 environment steps
+per update), PPO with learning rate 5e-5 and linear decay, gamma 0.99, GAE lambda 0.95,
+clip 0.2 and entropy coefficient 0.01. A 50 M-step fine-tune took about 17 hours on one
+A100 at roughly 829 environment steps per second.
 
-### Stage 1 — Pre-train the Occlusion VAEs
+## Known issues
 
-```bash
-# Collect occupancy grid data
-PYTHONPATH=. python3 collect_occlusion_data.py
+These were found after the experiments had run. The code here is the code that produced
+the results, so none of them is patched.
 
-# Pre-train Label-VAE (frozen teacher) and Sensor-VAE (student)
-PYTHONPATH=. python3 pretrain_occlusion_vae.py
-```
+- **Path length.** The vectorised environment resets inside `step()` when an episode
+  ends, so on the last step the evaluator reads the next episode's start position. The
+  path-length metric (inherited from HEIGHT's evaluator) therefore includes the jump to
+  the next start, about 4 m per episode. Episode-worst separation and intrusion depth also
+  include one sample of the next episode. Outcome counts, navigation time and the
+  intrusion ratio are not affected.
+- **One-step lag.** The environment reads the robot pose before the physics step and
+  moves the pedestrians first, so each observation pairs the robot at time t with
+  pedestrians at t + 1. This is HEIGHT's own ordering.
+- **Batch normalisation.** Evaluation never switches the model to evaluation mode, so the
+  occlusion encoder's batch normalisation uses batch statistics at test time, as it did
+  during training rollouts. The frozen teacher's batch-norm statistics were not frozen
+  either. HEIGHT itself has no batch normalisation.
+- **Latent re-sampling.** The occlusion latent is sampled again when PPO re-evaluates
+  actions, so the policy-update ratio carries sampling noise.
+- **Short-range grid.** Rays that hit nothing mark cells free out to the grid's edge
+  rather than to the sensor range, so at 3 m the grid shows unsensed cells as free. This
+  affects only the 3 m perception test.
+- **Resume.** A resumed run repeats the update it resumed from (840 environment steps for
+  `exp_nopredict_s2`, which was resumed from update 245,200 after a storage failure).
+- **Timeouts.** Episodes time out after 491 steps (49.1 s), because `env.time_limit = 50`
+  ends an episode once `global_time >= time_limit - 1`.
 
-### Stage 2 — Train HEIGHT-O with PPO
+## Superseded material
 
-```bash
-# Configure training in crowd_nav/configs/config.py
-# Then launch training (28 parallel environments)
-PYTHONPATH=. python3 train.py
-```
+`results/superseded/` keeps earlier outputs for the record: evaluations of intermediate
+checkpoints at n = 500, a summary written before the final protocol
+(`stage2_final_results.txt`, which still reports a 300 M-step budget and independent seeds),
+and an early pipeline test in `height_test_results/` that is unrelated to the reported
+system. None of it is used in the report.
 
-Training ran in segments: 76M steps from scratch, then a relaunch from that checkpoint (which reset the optimizer, learning-rate schedule and step counter) for a full 300M-step schedule, then a 50M-step fine-tune per seed — approximately 426M environment steps in total. The final fine-tune takes roughly 17 hours on an A100 with 28 parallel environments at ~829 FPS.
+## Environment
 
----
+The simulation settings are HEIGHT's released configuration: a 12 x 12 m walled arena with
+start, goal and spawn positions drawn mostly from its central 9 x 9 m, 7 +/- 2 moving ORCA
+pedestrians plus 0 to 2 standing ones, 10 +/- 2 static rectangular obstacles, and
+`robot.visible_prob = 0.2`, under which each moving pedestrian has a 20 % chance of
+perceiving the robot and standing ones never do (17.6 % of pedestrians on average). The
+robot is a differential-drive TurtleBot2 with commanded speed up to 0.5 m/s (the wheel-speed
+limit caps straight-line speed near 0.40 m/s), a 360 degree view and a 25 m lidar, at a
+0.1 s time step.
 
-## Evaluation
+## References
 
-```bash
-# Test on circle crossing scenario (500 episodes)
-PYTHONPATH=. python3 test.py
-
-# Test with more humans (stress test)
-PYTHONPATH=. python3 test_more_human.py
-
-# Test with more obstacles
-PYTHONPATH=. python3 test_more_obs.py
-```
-
----
-
-## Repository Structure
-
-```
-.
-├── crowd_nav/
-│   ├── configs/
-│   │   └── config.py              # All hyperparameters and settings
-│   └── policy/                    # Navigation policy wrappers
-│
-├── crowd_sim/
-│   ├── envs/
-│   │   ├── crowd_sim_tb2.py       # Action space (9 discrete actions)
-│   │   ├── crowd_sim_tb2_obs.py   # Observation + reward + acoustic logic
-│   │   └── utils/
-│   │       ├── human.py           # Human agent state tracking
-│   │       └── agent.py           # Base agent class
-│   └── pybullet/                  # PyBullet 3D simulation assets
-│
-├── training/
-│   ├── networks/
-│   │   ├── selfAttn_srnn_merge.py # Policy network (main architecture)
-│   │   ├── model.py               # Actor-critic wrapper
-│   │   └── storage.py             # PPO rollout storage
-│   ├── algo/
-│   │   └── ppo.py                 # PPO update logic
-│   └── prediction/
-│       └── gst_predictor.py       # Trajectory intention prediction
-│
-├── train.py                       # Main training script
-├── test.py                        # Evaluation script
-├── pretrain_occlusion_vae.py      # VAE pre-training script
-├── collect_occlusion_data.py      # Occupancy grid data collection
-├── requirements.txt               # Python dependencies
-│
-└── results/
-    ├── figures/                   # Architecture and results diagrams
-    └── test_logs/                 # Evaluation output logs
-```
-
----
-
-## Key Hyperparameters
-
-| Parameter | Value |
-|---|---|
-| Algorithm | PPO |
-| Total Timesteps | 300M |
-| Parallel Environments | 28 |
-| Learning Rate | 5×10⁻⁵ (linear decay) |
-| Discount Factor γ | 0.99 |
-| GAE λ | 0.95 |
-| PPO Clip ε | 0.2 |
-| Entropy Coefficient | 0.01 |
-| Robot Node RNN Size | 256 |
-| Occlusion Latent Size | 256 |
-| PaS Distillation Coeff. | 1.0 |
-| Prediction horizon | 5 steps (0.5 s) |
-| **`sim.predict_method`** | **`'truth'` — ORACLE, see [Honest Reporting](#honest-reporting)** |
-
----
-
-## Reward Function
-
-| Event | Reward |
-|---|---|
-| Goal reached | +20 |
-| Collision (any) | -20 |
-| Personal space violation | proportional penalty |
-| Progress toward goal | potential-based shaping |
-| Spinning in place | −0.05 × ω² |
-| Time step penalty | −0.025 |
-
----
-
-## Technical Highlights
-
-- **3D Physics Simulation**: Full TurtleBot2 differential-drive dynamics in PyBullet with realistic wheel friction and momentum
-- **Heterogeneous Graph**: Unified attention over robots, humans, and obstacles as distinct node types — handles variable numbers of agents
-- **Knowledge Distillation**: Sensor-VAE learns to infer complete scene occupancy from partial LiDAR data by mimicking the frozen Label-VAE's latent distribution
-- **Seamless Integration**: Occlusion latent fused into robot node embedding — no changes needed to the attention mechanism
-- **0% Wall Collision**: No wall collisions were observed across 3,500 test episodes. Note this is an observation, not an ablation — it has not been isolated to the occlusion module.
-
----
-
-## Dependencies
-
-```
-torch>=2.0.0
-pybullet
-gym
-numpy
-pandas
-matplotlib
-scipy
-```
-
-See `requirements.txt` for the full pinned list.
-
----
+- S. Liu et al., "HEIGHT: Heterogeneous interaction graph transformer for robot navigation
+  in crowded and constrained environments," IEEE Transactions on Automation Science and
+  Engineering, 2026. Code: https://github.com/Shuijing725/CrowdNav_HEIGHT
+- Y.-J. Mun, M. Itkina, S. Liu and K. Driggs-Campbell, "Occlusion-aware crowd navigation
+  using people as sensors," ICRA 2023.
+- S. Liu et al., "Intention aware robot crowd navigation with attention-based interaction
+  graph," ICRA 2023.
 
 ## License
 
-MIT License — see [LICENSE](LICENSE) for details.
+MIT License; see [LICENSE](LICENSE). The HEIGHT codebase this builds on is MIT-licensed by
+its authors, and their notice is preserved.

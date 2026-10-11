@@ -20,8 +20,12 @@ only ever consumed by Sensor_VAE/Label_VAE, never compared against
 world_to_robot()'s outputs.
 
 Values: 0 = free, 1 = occupied by a human, 0.5 = unknown/occluded (sensor_grid only).
-Obstacles themselves are not encoded here -- they're static and already given
-to the network via obstacle_vertices; only humans need inference.
+Obstacles themselves are not encoded here -- the policy receives them through the
+obstacle-only lidar point cloud (ob['point_clouds']); only humans need inference.
+
+Known limitation: rays that hit nothing are marked free out to the grid's edge
+(max_extent), not to the sensor range, so at sensor ranges below the grid half-width
+(e.g. the 3 m and 5 m cells of the range sweep) unsensed cells read as free, not unknown.
 """
 
 UNKNOWN = 0.5

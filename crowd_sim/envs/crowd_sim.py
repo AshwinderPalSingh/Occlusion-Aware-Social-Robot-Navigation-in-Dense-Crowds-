@@ -229,6 +229,58 @@ class CrowdSim(gym.Env):
         return
 
 
+    # ══════════════════════════════════════════════════════════════════════
+    # Stage 3: Active Acoustic Perception
+    # ══════════════════════════════════════════════════════════════════════
+
+    def compute_acoustic_strength(self, robot_pos, human_pos):
+        """Gaussian-decay acoustic field strength (L2B-style).
+        Returns a value in [0, 1] representing how strongly the
+        acoustic signal reaches a human at the given position."""
+        d = np.linalg.norm(np.array(human_pos) - np.array(robot_pos))
+        if d > self.config.acoustic.max_range:
+            return 0.0
+        return np.exp(-d**2 / (2 * self.config.acoustic.sigma**2))
+
+    def _init_acoustic_state(self):
+        """Initialize acoustic state for all humans at episode start.
+        Called from reset()."""
+        # Path B per-episode detection tally (read by evaluation.py after the episode
+        # ends, so it must be cleared here at episode start, not on `done`).
+        self._occluded_heard_ids = set()
+        self._num_occluded_heard = 0
+        self._num_occluded_newly_heard = 0
+        # NOTE: _last_episode_occluded_heard is deliberately NOT reset here -- it holds
+        # the completed episode's tally for evaluation.py to read after done.
+        if not hasattr(self, '_last_episode_occluded_heard'):
+            self._last_episode_occluded_heard = 0
+
+        if not hasattr(self.config, 'acoustic') or not self.config.acoustic.enabled:
+            return
+
+        for human in self.humans:
+            human.acoustic_responding = False
+            human.acoustic_returning = False
+            human.acoustic_return_timer = 0
+            human.acoustic_belief_world = None
+            human.acoustic_belief_timer = 0
+            human.acoustic_belief_quality = 0.0
+            human.acoustic_belief_err = 0.0
+            human.acoustic_belief_n = 0
+            human.acoustic_pending = False
+            human.acoustic_delay_timer = 0
+            human.acoustic_response_timer = 0
+            human.acoustic_force_dir = np.array([0., 0.])
+            human.acoustic_force_strength = 0.0
+            human.acoustic_signal_strength = 0.0
+            human.original_gx = None
+            human.original_gy = None
+            # Randomize compliance per episode
+            human.acoustic_compliant = (
+                np.random.random() < self.config.acoustic.compliance_rate
+            )
+
+
     def set_robot(self, robot):
         raise NotImplementedError
 
@@ -777,6 +829,8 @@ class CrowdSim(gym.Env):
 
         self.generate_robot_humans(phase)
 
+        # Stage 3: Initialize acoustic state for all humans
+        self._init_acoustic_state()
 
         # If configured to randomize human policies, do so
         if self.random_policy_changing:
@@ -1065,6 +1119,13 @@ class CrowdSim(gym.Env):
             # print('original r:', reward, 'r spin:', r_spin, 'r_back:', r_back)
             reward = reward + r_spin + r_back
 
+        # Stage 3 acoustic reward shaping (speak_penalty + info_gain_coef) is applied in
+        # CrowdSim3DTbObs.step() (crowd_sim_tb2_obs.py), the actually-reachable class for
+        # this policy -- this class's own generate_ob()/calc_reward() acoustic hooks were
+        # dead code (this CrowdSim.calc_reward() IS live -- called from CrowdSim3DTB.step()
+        # -- but `self._spoke_this_step` was only ever set by the now-removed
+        # apply_acoustic_signal(), which itself was never reachable with is_speak=True).
+
         # print(reward)
         return reward, done, episode_info
 
@@ -1139,6 +1200,14 @@ class CrowdSim(gym.Env):
             ob.extend(list(robotS))
 
             ob.extend(list(np.ravel(self.last_human_states)))
+
+            # ── Stage 3: Append binary speak flag ──
+            # Tells the network "I just spoke, incoming observations may
+            # reflect human responses" — NO occluded positions leaked.
+            if hasattr(self.config, 'acoustic') and self.config.acoustic.enabled:
+                spoke = 1.0 if (hasattr(self, '_spoke_this_step') and self._spoke_this_step) else 0.0
+                ob.append(spoke)
+
             ob = np.array(ob)
 
         else: # for orca and sf
@@ -1187,7 +1256,15 @@ class CrowdSim(gym.Env):
                     else:
                         ob += [self.dummy_robot.get_observable_state()]
 
-                human_actions.append(human.act(ob))
+                base_action = human.act(ob)
+
+                # Stage 3 acoustic response is handled entirely by CrowdSim3DTbObs's
+                # _apply_acoustic_force()/_update_acoustic_responses() (crowd_sim_tb2_obs.py),
+                # via a temporary goal-shift that ORCA's own act() call above already reacts
+                # to. This used to ALSO add a raw velocity nudge on top of that here, which
+                # double-applied the repulsion and double-decremented the response timer
+                # (once here, once in _update_acoustic_responses) -- removed.
+                human_actions.append(base_action)
         return human_actions
 
 

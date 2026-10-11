@@ -1,0 +1,40 @@
+collision episodes classified : 336  (skipped 0)
+
+A. outcome type
+  CollisionHuman  336  100.0%
+
+B. where the human was, in the robot frame, at impact
+  side          208   61.9%
+  behind         91   27.1%
+  front          37   11.0%
+
+C. relative motion at impact
+  oncoming      247   73.5%
+  crossing       78   23.2%
+  receding       11    3.3%
+
+D. reactivity of the colliding human
+   reactive        1    0.3%
+   non-reactive  335   99.7%
+   base rate: 17.62% of pedestrians reactive (0.2 x E[dyn/total]; static are never reactive), i.e. 82.38% non-reactive
+   z against base rate = 8.33   p = 7.8e-17   Cohen h = 0.76
+
+E. robot speed at impact (v_max = 0.5 m/s)
+   mean 0.255   median 0.268   frac above 0.4 m/s: 27.7%
+   Low speeds would indicate the robot was already braking into the
+   collision; high speeds that it drove in at pace.
+
+F. time since the colliding human last changed heading by >29 deg
+   (this is the direct test of the stated failure mode:
+    "a human arrives at its goal and suddenly changes directions")
+   within 0.5 s of impact :   24   18.0%
+   within 1.0 s of impact :   52   39.1%
+   within 2.0 s of impact :   70   52.6%
+   within 3.0 s of impact :   80   60.2%
+   median 1.70 s   mean 4.41 s
+   never changed heading in the record : 203  (60.4%)
+
+READ: a high fraction in the "within 1-2 s" rows would support the stated
+  failure mode and motivate multi-modal goal prediction. A low fraction would
+  mean collisions are dominated by steady-heading approaches instead, which
+  points away from goal-change anticipation as the missing ingredient.

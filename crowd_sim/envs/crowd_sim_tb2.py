@@ -139,12 +139,15 @@ class CrowdSim3DTB(CrowdSimVarNum):
 
     def set_observation_space(self):
         d = {}
-        # robot node: gx-px, gy-py, theta
+        # robot node: gx-px, gy-py, theta (+ speak flag if acoustic enabled)
         if self.config.ob_space.robot_state == 'absolute':
-            d['robot_node'] = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(1, 5,), dtype=np.float32)
+            robot_node_size = 5
         else:
-            d['robot_node'] = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(1, 3,), dtype=np.float32)
-        # d['robot_node'] = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(1,7,), dtype=np.float32)
+            robot_node_size = 3
+        # Stage 3: Add 1 dimension for binary speak flag
+        if hasattr(self.config, 'acoustic') and self.config.acoustic.enabled:
+            robot_node_size += 1
+        d['robot_node'] = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(1, robot_node_size,), dtype=np.float32)
         # only consider all temporal edges (human_num+1) and spatial edges pointing to robot (human_num)
         d['temporal_edges'] = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(1, 2,), dtype=np.float32)
         # make sure there's at least one human
@@ -163,20 +166,17 @@ class CrowdSim3DTB(CrowdSimVarNum):
             high = np.inf * np.ones([2, ])
             self.action_space = gym.spaces.Box(-high, high, dtype=np.float32)
         elif self.config.env.action_space == 'discrete':
-            # naive action space, does not consider acceleration limits
-            # translational velocity: 0, 1
-            # rotational velocity: 0.5 (left turn), 0, -0.5 (right turn)
-            # tables to convert actions from index to value
-            # 0: left rotation in place, 1: stop, 2: right rotation in place
-            # 3: left circling, 4: going straight, 5: right circling
-            # self.action_convert = {0: [0, 0.5], 1: [0, 0], 2: [0, -0.5], 3: [1, 0.5], 4: [1, 0], 5: [1, -0.5]}
-
             # action is change of v and w, for sim2real
             # translational velocity change: +0.05, 0, -0.05 m/s
             # rotational velocity change: +0.1, 0, -0.1 rad/s
             self.action_convert = {0: [0.05, 0.1], 1: [0.05, 0], 2: [0.05, -0.1],
                                    3: [0, 0.1], 4: [0, 0], 5: [0, -0.1],
                                    6: [-0.05, 0.1], 7: [-0.05, 0], 8: [-0.05, -0.1]}
+
+            # Stage 3: Duplicate actions 0-8 as 9-17 (same movement + speak=True)
+            if hasattr(self.config, 'acoustic') and self.config.acoustic.enabled:
+                for i in range(9):
+                    self.action_convert[i + 9] = self.action_convert[i]
 
             self.action_space = gym.spaces.Discrete(len(self.action_convert))
 
@@ -422,8 +422,12 @@ class CrowdSim3DTB(CrowdSimVarNum):
         # we use zed camera to detect humans, so we need to add a camera FOV here
         self.ray_test(camera_fov=True)
 
+        # Oracle diagnostic: bypass occlusion entirely. Used to measure the performance
+        # ceiling under perfect perception -- see sim.oracle_visibility in config.py.
+        _oracle = getattr(self.config.sim, 'oracle_visibility', False)
+
         for i in range(self.human_num):
-            visible = True if self.humans[i].uid in self.visible_human_uids else False
+            visible = True if _oracle else (self.humans[i].uid in self.visible_human_uids)
             if visible:
                 humans_in_view.append(self.humans[i])
                 num_humans_in_view = num_humans_in_view + 1
@@ -486,6 +490,11 @@ class CrowdSim3DTB(CrowdSimVarNum):
             ob['robot_node'] = self.robot.get_changing_state_list()
         else:
             ob['robot_node'] = self.robot.get_changing_state_list_goal_offset()
+
+        # Stage 3: Append binary speak flag to robot_node
+        if hasattr(self.config, 'acoustic') and self.config.acoustic.enabled:
+            spoke = 1.0 if (hasattr(self, '_spoke_this_step') and self._spoke_this_step) else 0.0
+            ob['robot_node'] = list(ob['robot_node']) + [spoke]
 
         # print("check robot node inside 2: ", ob["robot_node"])
 
@@ -841,6 +850,9 @@ class CrowdSim3DTB(CrowdSimVarNum):
         self.create_scenario(phase=phase, test_case=test_case)
         self.create_goal_object()
 
+        # Stage 3: Initialize acoustic state for all humans
+        self._init_acoustic_state()
+
         # compute the observation
         ob = self.generate_ob(reset=True)
         # self.rob_prev_px, self.rob_prev_py = 0, 0
@@ -869,6 +881,13 @@ class CrowdSim3DTB(CrowdSimVarNum):
     def step(self, action, update=True):
         # print('Step', self.envStepCounter)
 
+        # Stage 3 acoustic triggering happens in CrowdSim3DTbObs.step() (crowd_sim_tb2_obs.py)
+        # BEFORE it calls super().step() (i.e. before this method runs) -- it has to run
+        # there, not here, since only that class's step() sees the action BEFORE it gets
+        # remapped from the 18-action (move+speak) space down to the 9-action (move-only)
+        # space this class's action_convert table expects. Calling apply_acoustic_signal()
+        # here (on the already-remapped, always <9 action_idx) was dead code -- removed
+        # along with the method itself.
         human_actions = self.get_human_actions()
 
         # compute reward and episode info

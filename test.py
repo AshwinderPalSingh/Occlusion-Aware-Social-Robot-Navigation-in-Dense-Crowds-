@@ -38,6 +38,8 @@ def main():
 	parser.add_argument('--visualize_lidar_rays', default=False, action='store_true')
 	# save slideshow
 	parser.add_argument('--save_slides', default=False, action='store_true')
+	# Random speak ablation flag
+	parser.add_argument('--random_speak', default=False, action='store_true')
 
 	test_args = parser.parse_args()
 
@@ -110,6 +112,7 @@ def main():
 	device = torch.device("cuda" if config.training.cuda else "cpu")
 	if test_args.cpu:
 		device = torch.device("cpu")
+		config.training.cuda = False
 	print(device)
 	logging.info('Create other envs with new settings')
 

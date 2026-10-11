@@ -1,8 +1,10 @@
+import os
 import numpy as np
 import torch.nn as nn
 import torch
 from training.networks.utils import init
 from training.networks.network_utils import RNNBase, reshapeT
+from training.networks.occlusion_vae import Label_VAE, Sensor_VAE
 
 class SpatialEdgeSelfAttn(nn.Module):
     def __init__(self, config):
@@ -24,6 +26,13 @@ class SpatialEdgeSelfAttn(nn.Module):
                     self.input_size = 2
             else:
                 raise ValueError("Unknown environment name")
+
+            if hasattr(self.config.sim, 'predict_method') and self.config.sim.predict_method != 'none':
+                self.input_size += self.config.sim.predict_steps * 2
+            # +1 for the per-agent confidence channel appended in generate_ob
+            if (hasattr(config, 'acoustic') and config.acoustic.enabled
+                    and getattr(config.acoustic, 'confidence_channel', False)):
+                self.input_size += 1
 
         self.num_attn_heads=8
         self.attn_size=self.config.SRNN.self_attn_size
@@ -322,20 +331,76 @@ class selfAttn_merge_SRNN(nn.Module):
         self.critic_linear = self.init_(nn.Linear(hidden_size, 1))
         robot_size = obs_space_dict['robot_node'].shape[1]
 
-        self.robot_linear = nn.Sequential(self.init_(nn.Linear(robot_size, config.SRNN.robot_embedding_size)), nn.ReLU())
+        # Stage 2: occlusion inference (PaS-VAE merge). z_occ is concatenated onto the raw
+        # robot_node BEFORE robot_linear (not after), so EndRNN/EndRNNLidar downstream are
+        # untouched -- only robot_linear's input size changes.
+        self.use_occlusion = hasattr(config.sim, 'occlusion_method') and config.sim.occlusion_method == 'vae'
+        self.last_z_occ = None
+        self.last_z_l = None
+        if self.use_occlusion:
+            self.Sensor_VAE = Sensor_VAE(config)
+            self.Label_VAE = Label_VAE(config)
+            ckpt_path = config.pas.label_vae_ckpt
+            if not os.path.exists(ckpt_path):
+                raise FileNotFoundError(
+                    f"config.sim.occlusion_method == 'vae' but no Label_VAE checkpoint at "
+                    f"'{ckpt_path}'. Run pretrain_occlusion_vae.py to epoch 300 first.")
+            self.Label_VAE.load_state_dict(torch.load(ckpt_path, map_location='cpu'))
+            for param in self.Label_VAE.parameters():
+                param.requires_grad = False
+            robot_linear_input_size = robot_size + config.SRNN.occlusion_latent_size
+        else:
+            robot_linear_input_size = robot_size
+
+        self.robot_linear = nn.Sequential(self.init_(nn.Linear(robot_linear_input_size, config.SRNN.robot_embedding_size)), nn.ReLU())
         # self.human_node_final_linear=self.init_(nn.Linear(self.output_size,2))
 
         if self.config.SRNN.use_self_attn:
             self.spatial_attn = SpatialEdgeSelfAttn(config)
             self.spatial_linear = nn.Sequential(self.init_(nn.Linear(self.config.SRNN.self_attn_size, config.SRNN.human_embedding_size)), nn.ReLU())
-            # self.spatial_linear = nn.Sequential(self.init_(nn.Linear(self.config.SRNN.self_attn_size, 64)), nn.ReLU())
         else:
-            # self.spatial_linear = nn.Sequential(self.init_(nn.Linear(obs_space_dict['spatial_edges'].shape[1], 128)), nn.ReLU(),
-            #                                     self.init_(nn.Linear(128, 256)), nn.ReLU())
-            # todo: 64
             self.spatial_linear = nn.Sequential(self.init_(nn.Linear(obs_space_dict['spatial_edges'].shape[1], config.SRNN.human_embedding_size)), nn.ReLU())
 
+        # Stage 3: Acoustic edge processing — embed per-human acoustic state and fuse with spatial
+        self.use_acoustic = hasattr(config, 'acoustic') and config.acoustic.enabled
+        if self.use_acoustic:
+            # acoustic_edges shape: [max_human_num, 4] -> [is_responding, strength, rel_px, rel_py]
+            # Path B adds acoustic_returns, same shape ->
+            #   [is_heard, noisy_rel_px, noisy_rel_py, localization_quality]
+            # which is the only channel carrying info about humans the camera cannot see.
+            self.use_acoustic_returns = getattr(config.acoustic, 'return_enabled', False)
+            acoustic_in_dim = 8 if self.use_acoustic_returns else 4
+            self.acoustic_linear = nn.Sequential(
+                self.init_(nn.Linear(acoustic_in_dim, config.SRNN.human_embedding_size)), nn.ReLU()
+            )
+            # Fuse acoustic + spatial human embeddings: concat then project back down
+            self.acoustic_fuse = nn.Sequential(
+                self.init_(nn.Linear(config.SRNN.human_embedding_size * 2, config.SRNN.human_embedding_size)), nn.ReLU()
+            )
 
+
+    def encode_occlusion(self, inputs, seq_length, nenv, infer):
+        '''
+        Encodes inputs['grid'] (partial sensor grid) with Sensor_VAE into z_occ, shaped
+        to match robot_states ([seq_length, nenv, 1, occlusion_latent_size]) for
+        concatenation before robot_linear. During training (not infer), also encodes
+        inputs['label_grid'] with the frozen Label_VAE and stashes both latents on
+        self.last_z_occ / self.last_z_l so training/algo/ppo.py can add the
+        Sensor_VAE-to-Label_VAE distillation loss after evaluate_actions().
+        '''
+        _, _, z = self.Sensor_VAE.encode(inputs['grid'])  # z: (seq_length*nenv, 1, latent)
+        z_occ = reshapeT(z, seq_length, nenv)  # (seq_length, nenv, 1, latent)
+
+        if not infer:
+            with torch.no_grad():
+                _, _, z_l = self.Label_VAE.encode(inputs['label_grid'])
+            self.last_z_occ = z.reshape(-1, 1, self.config.SRNN.occlusion_latent_size)
+            self.last_z_l = z_l.reshape(-1, 1, self.config.SRNN.occlusion_latent_size)
+        else:
+            self.last_z_occ = None
+            self.last_z_l = None
+
+        return z_occ
 
     def forward(self, inputs, rnn_hxs, masks, infer=False):
         if infer:
@@ -366,6 +431,8 @@ class selfAttn_merge_SRNN(nn.Module):
         #     all_hidden_states_edge_RNNs = Variable(
         #         torch.zeros(1, nenv, 1+self.human_num, rnn_hxs['human_human_edge_rnn'].size()[-1]).cuda())
 
+        if self.use_occlusion:
+            robot_states = torch.cat([robot_states, self.encode_occlusion(inputs, seq_length, nenv, infer)], dim=-1)
         robot_states = self.robot_linear(robot_states)
 
         # Spatial Edges
@@ -375,6 +442,18 @@ class selfAttn_merge_SRNN(nn.Module):
         else:
             spatial_attn_out = spatial_edges
         output_spatial = self.spatial_linear(spatial_attn_out)
+
+        # Stage 3: Fuse acoustic edges (+ Path B acoustic returns) with spatial embeddings
+        if self.use_acoustic and 'acoustic_edges' in inputs:
+            acoustic_edges = reshapeT(inputs['acoustic_edges'], seq_length, nenv)
+            if getattr(self, 'use_acoustic_returns', False) and 'acoustic_returns' in inputs:
+                acoustic_returns = reshapeT(inputs['acoustic_returns'], seq_length, nenv)
+                acoustic_edges = torch.cat([acoustic_edges, acoustic_returns], dim=-1)
+            acoustic_out = self.acoustic_linear(acoustic_edges)
+            # Concatenate and project: [spatial_embed | acoustic_embed] -> fused_embed
+            output_spatial = self.acoustic_fuse(
+                torch.cat([output_spatial, acoustic_out], dim=-1)
+            )
 
         # robot-human attention
         if self.config.SRNN.use_hr_attn:

@@ -16,7 +16,7 @@ venv/
 
 # Data & logs (keep results folder but ignore raw checkpoints)
 data/
-logs/
+/logs/
 
 # System
 .DS_Store

@@ -23,14 +23,15 @@ class Config(object):
     # all other policies: 'CrowdSim3DTbObs-v0'
     # A*+CNN: 'CrowdSim3DTbObsHieTrain-v0'
     env.env_name = 'CrowdSim3DTbObs-v0'  # name of the gym environment
+    env.traj_dump = False
     env.action_space = 'discrete'  # discrete or continuous action space
     # recommended value: if goal dist in [7, 9]: 30, if goal dist < 5: 20
     env.time_limit = 50  # time limit of each episode (second)
     env.time_step = 0.1  # length of each timestep/control frequency (second)
     env.val_size = 100
-    env.test_size = 500  # number of episodes for test.py
+    env.test_size = 3500
     env.randomize_attributes = False  # randomize the preferred velocity and radius of humans or not
-    env.seed = 50569  # random seed for environment
+    env.seed = 1
     # circle_crossing: circle crossing humans, random robot init & goal poses, random obstacles
     # csl_workspace: human flow in a set of regions, robot init & goal poses in a set of regions, fixed obstacles
     env.scenario = 'circle_crossing'
@@ -97,6 +98,37 @@ class Config(object):
     sim.circle_radius = 4
     # sim.robot_circle_radius = 5
     sim.robot_circle_radius = 4
+    # prediction config
+    sim.predict_steps = 5
+    # 'const_vel': constant velocity model,
+    # 'truth': ground truth future traj
+    # 'inferred': inferred future traj from GST network
+    # 'none': no prediction
+    sim.predict_method = 'truth'
+    # occlusion inference (Stage 2 / PaS-VAE merge):
+    # 'vae': fuse an occlusion latent (from a Sensor_VAE trained to match a frozen,
+    #        pretrained Label_VAE) into the robot node before the attention graph
+    # 'none': no occlusion inference (default, matches pre-Stage-2 behavior)
+    sim.occlusion_method = 'vae'
+
+    # ORACLE UPPER BOUND (diagnostic, not a method): when True, every human is treated as
+    # visible regardless of raycast occlusion. This measures whether perception is the
+    # binding constraint at all. If a policy with perfect state information performs no
+    # better than one under heavy occlusion, then no sensing improvement -- acoustic or
+    # otherwise -- can raise the ceiling, and the ~90% plateau is geometric/behavioural
+    # rather than perceptual.
+    sim.oracle_visibility = False
+
+    # config for the learned trajectory predictor (GST), only used when
+    # sim.predict_method == 'inferred'
+    pred = BaseConfig()
+    pred.model_dir = 'data/gst_predictor'
+    # GST was trained on trajectories sampled every 0.25s (its own training pred_timestep);
+    # HEIGHT steps every sim.env.time_step=0.1s, which 0.25 doesn't evenly divide.
+    # pred.interval=2 (0.2s) is the nearest-integer approximation -- a documented, accepted
+    # domain-gap limitation (see the GST-integration plan notes), not an exact replication.
+    # Only retrain/refine this if evaluation shows it's inadequate.
+    pred.interval = 2
     # controls the obstacle positions
     if env.mode == 'sim':
         sim.arena_size = 4.5
@@ -431,7 +463,7 @@ class Config(object):
     # lidar range: see robot.sensor_range
     # the height of the lidar mounting point from floor
     lidar.height = 0.5
-    lidar.sensor_range = 25  # based on official document of RPLidar R3
+    lidar.sensor_range = 25
     lidar.visualize_rays = False  # should always be false to speed up training and testing without GUI
 
     # camera config
@@ -587,6 +619,75 @@ class Config(object):
     SRNN.use_self_attn = True  # HH attn
     SRNN.self_attn_size = 128
 
+    # size of the occlusion latent z_occ produced by Sensor_VAE/Label_VAE,
+    # concatenated onto robot_node before self.robot_linear when sim.occlusion_method=='vae'
+    SRNN.occlusion_latent_size = 256
+
+    # config for the occlusion-inference VAE (Stage 2, ported from PaS-CrowdNav)
+    # only used when sim.occlusion_method == 'vae'
+    pas = BaseConfig()
+    pas.grid_res = 0.1  # meters per grid cell
+    pas.grid_size = 100  # grid is grid_size x grid_size cells -> 10m x10m at grid_res=0.1
+    # weight of the Sensor_VAE-to-Label_VAE latent-matching loss added to the PPO loss
+    pas.PaS_coef = 1.0
+    # frozen Label_VAE checkpoint, produced by pretrain_occlusion_vae.py (must reach epoch 300)
+    pas.label_vae_ckpt = 'data/occlusion_vae/label_vae_ckpt/label_vae_weight_300.pth'
+    # number of episodes collected per phase by collect_occlusion_data.py
+    pas.collect_train_episodes = 1000
+    pas.collect_val_episodes = 100
+    pas.collect_test_episodes = 200
+
+    # Stage 3: Acoustic Social Force — verbal communication
+    acoustic = BaseConfig()
+    acoustic.enabled = False
+    acoustic.sigma = 3.0                # Gaussian decay σ (meters) — effective voice reach
+    acoustic.max_range = 5.0            # Hard cutoff distance (meters) — signal is 0 beyond this
+    acoustic.alpha = 0.5                # Response strength multiplier for human velocity shift
+    acoustic.compliance_rate = 0.8      # Probability that a human obeys the verbal cue
+    acoustic.response_delay = 2         # Timesteps before human starts reacting (0.2s at dt=0.1)
+    acoustic.response_duration = 30     # Timesteps the human stays pushed away (3s at dt=0.1)
+    acoustic.return_smoothing = 10      # Timesteps for smooth return to original path (1s)
+    acoustic.cooldown = 20              # Min timesteps between speak actions (2s at dt=0.1)
+    acoustic.speak_penalty = -0.1       # Reward penalty per speak action (prevents spam)
+    acoustic.info_gain_coef = 0.0
+    acoustic.goal_shift_scale = 2.0     # How far (meters) to shift a human's goal when responding
+
+    # ── Path B: acoustic RETURN channel ("social echolocation") ──
+    # A human who complies with a beep vocalizes back ("sorry!", "coming through").
+    # The robot hears that vocalization and gets a noisy bearing/range fix on them.
+    # Crucially, audio diffracts around corners where vision cannot, so this can
+    # localize a human the camera cannot see -- that is the actual sensing mechanism
+    # the "social echolocation" claim rests on.
+    #
+    # It is deliberately WORSE than vision rather than a wallhack: measurements are
+    # noisy, transient (audible only while vocalizing), and further degraded when the
+    # speaker is occluded (diffraction destroys localization cues). An occluded human
+    # is therefore localized to a rough neighbourhood, never an exact position.
+    acoustic.return_enabled = False
+    acoustic.return_max_range = 8.0      # How far a human's vocal reply carries (m)
+    acoustic.return_duration = 5         # Timesteps the reply stays audible (0.5s at dt=0.1)
+    acoustic.return_bearing_noise = 0.12 # Bearing noise std (rad, ~7deg) in line of sight
+    acoustic.return_range_noise = 0.4    # Range noise std (m) -- audio ranging is poor
+    acoustic.return_occluded_noise_mult = 2.5  # Noise multiplier when speaker is occluded
+    # How long an audio fix is REMEMBERED after the voice stops (timesteps). Without this
+    # the fix survives only return_duration (~0.5s) -- too brief for the policy to steer
+    # on, so the information arrives and evaporates before it can change behaviour. The
+    # remembered estimate is held in world coordinates and re-projected into the robot
+    # frame each step (so it stays correct as the robot moves), with its quality decaying
+    # linearly to zero -- an explicit, decaying belief rather than a momentary ping.
+    # Bounded deliberately: the belief has NO motion model, so a frozen estimate drifts
+    # by humans.v_pref * belief_duration * dt. At 30 steps that was 1.5m of drift against
+    # a 0.45m collision envelope -- the robot confidently avoided ghosts and swerved into
+    # obstacles (v2: 23% collision vs 9.6%). 10 steps caps drift at 0.5m, comparable to
+    # the ~0.69m fix error, so the estimate never becomes wildly wrong before expiring.
+    acoustic.belief_duration = 10  # 1s at dt=0.1
+    # Expose per-agent confidence to the policy as an explicit spatial_edges channel.
+    # Injecting uncertain positions WITHOUT this is what broke v2: an audio-derived row
+    # was structurally identical to a confirmed visual detection, so the network could not
+    # learn to discount it. Making uncertainty visible is the standard fix in the
+    # uncertainty-aware navigation literature (arXiv:2409.10655).
+    acoustic.confidence_channel = False
+
 
     # training config
     training = BaseConfig()
@@ -594,7 +695,7 @@ class Config(object):
     training.eps = 1e-5  # RMSprop optimizer epsilon
     training.alpha = 0.99  # RMSprop optimizer alpha
     training.max_grad_norm = 0.5  # max norm of gradients
-    training.num_env_steps = 200e6  # number of environment steps to train: 10e6 for holonomic, 20e6 for unicycle
+    training.num_env_steps =  50e6
     training.use_linear_lr_decay = True  # use a linear schedule on the learning rate: True for unicycle, False for holonomic
     training.save_interval = 200  # save interval, one save per n updates
     training.log_interval = 20  # log interval, one log per n updates
@@ -603,12 +704,12 @@ class Config(object):
     training.cuda = True  # use CUDA for training
     training.num_processes = 28  # was 16, how many training CPU processes to use
     # todo: change this
-    training.output_dir = 'data/ours_RH_HH_hallwayEnv_new'  # the saving directory for train.py
+    training.output_dir = 'data/exp_nospeak_s1'
     # resume training from an existing checkpoint or not
     # none: train RL from scratch, rl: load a RL weight
-    training.resume = 'none'
+    training.resume = 'rl'
     # if resume != 'none', load from the following checkpoint
-    training.load_path = 'trained_models/ours_HH_RH_randEnv/checkpoints/237800.pt'
+    training.load_path = 'data/exp_nospeak_s1/checkpoints/000000.pt'
     training.overwrite = True  # whether to overwrite the output directory in training
     training.num_threads = 1  # number of threads used for intraop parallelism on CPU
 
@@ -640,3 +741,9 @@ class Config(object):
     planner.replan = False
     planner.replan_freq = 30
     planner.om_inludes_human = False
+
+    cbf = BaseConfig()
+    cbf.enabled = False
+    cbf.obstacles = False
+    cbf.margin = 0.10
+    cbf.horizon = 10

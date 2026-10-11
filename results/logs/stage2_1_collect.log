@@ -1,0 +1,72 @@
+Gym has been unmaintained since 2022 and does not support NumPy 2.0 amongst other critical functionality.
+Please upgrade to Gymnasium, the maintained drop-in replacement of Gym, or contact the authors of your software and request that they upgrade.
+See the migration guide at https://gymnasium.farama.org/introduction/migration_guide/ for additional information.
+pybullet build time: Nov 28 2023 23:45:17
+train: collected 20/1000 episodes
+train: collected 40/1000 episodes
+train: collected 60/1000 episodes
+train: collected 80/1000 episodes
+train: collected 100/1000 episodes
+train: collected 120/1000 episodes
+train: collected 140/1000 episodes
+train: collected 160/1000 episodes
+train: collected 180/1000 episodes
+train: collected 200/1000 episodes
+train: collected 220/1000 episodes
+train: collected 240/1000 episodes
+train: collected 260/1000 episodes
+train: collected 280/1000 episodes
+train: collected 300/1000 episodes
+train: collected 320/1000 episodes
+train: collected 340/1000 episodes
+train: collected 360/1000 episodes
+train: collected 380/1000 episodes
+train: collected 400/1000 episodes
+train: collected 420/1000 episodes
+train: collected 440/1000 episodes
+train: collected 460/1000 episodes
+train: collected 480/1000 episodes
+train: collected 500/1000 episodes
+train: collected 520/1000 episodes
+train: collected 540/1000 episodes
+train: collected 560/1000 episodes
+train: collected 580/1000 episodes
+train: collected 600/1000 episodes
+train: collected 620/1000 episodes
+train: collected 640/1000 episodes
+train: collected 660/1000 episodes
+train: collected 680/1000 episodes
+train: collected 700/1000 episodes
+train: collected 720/1000 episodes
+train: collected 740/1000 episodes
+train: collected 760/1000 episodes
+train: collected 780/1000 episodes
+train: collected 800/1000 episodes
+train: collected 820/1000 episodes
+train: collected 840/1000 episodes
+train: collected 860/1000 episodes
+train: collected 880/1000 episodes
+train: collected 900/1000 episodes
+train: collected 920/1000 episodes
+train: collected 940/1000 episodes
+train: collected 960/1000 episodes
+train: collected 980/1000 episodes
+train: collected 1000/1000 episodes
+val: collected 20/100 episodes
+val: collected 40/100 episodes
+val: collected 60/100 episodes
+val: collected 80/100 episodes
+val: collected 100/100 episodes
+test: collected 20/200 episodes
+test: collected 40/200 episodes
+test: collected 60/200 episodes
+test: collected 80/200 episodes
+test: collected 100/200 episodes
+test: collected 120/200 episodes
+test: collected 140/200 episodes
+test: collected 160/200 episodes
+test: collected 180/200 episodes
+test: collected 200/200 episodes
+Done. Data saved under data/occlusion_vae/VAEdata
+argv[0]=
+argv[0]=

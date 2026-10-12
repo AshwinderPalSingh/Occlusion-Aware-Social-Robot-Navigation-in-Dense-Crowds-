@@ -30,7 +30,7 @@ repository documents. Every number below is measured over 3,500 test episodes.
 | Question | Result |
 | --- | --- |
 | Does the integrated system succeed more often? | 88.08 +/- 0.49 % over three seeds against 88.03 % for HEIGHT's released checkpoint (+0.05 points, t = 0.17) |
-| Does better perception help? | Perfect pedestrian state gives no gain at the default 25 m sensing range (3,099 vs 3,099 successes); +3.03 points at 3 m |
+| Does better perception help? | For this checkpoint, perfect pedestrian state gives no gain at the default 25 m sensing range (3,099 vs 3,099 successes); +3.03 points at 3 m |
 | What does move success? | Raising `robot.visible_prob` from 0.2 to 1.0 raises it from 88.54 % to 98.77 % (HEIGHT: 88.03 % to 98.89 %) |
 | Who does the robot collide with? | 335 of 336 pedestrian collisions involve a pedestrian that cannot perceive the robot (base rate 82.4 %) |
 | Does it keep more distance from people? | With the simulator's forecasts, 16 % fewer personal-space intrusions than the released checkpoint and 11.4 % fewer than HEIGHT fine-tuned to 350 M steps |

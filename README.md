@@ -30,14 +30,14 @@ repository documents. Every number below is measured over 3,500 test episodes.
 | Question | Result |
 | --- | --- |
 | Does the integrated system succeed more often? | 88.08 +/- 0.49 % over three seeds against 88.03 % for HEIGHT's released checkpoint (+0.05 points, t = 0.17) |
-| Does better perception help? | For this checkpoint, perfect pedestrian state gives no gain at the default 25 m sensing range (3,099 vs 3,099 successes); +3.03 points at 3 m |
+| Does better perception help? | For this checkpoint, perfect pedestrian state gives no detectable gain at the default 25 m sensing range (3,099 vs 3,099 successes); +3.03 points at 3 m |
 | What does move success? | Raising `robot.visible_prob` from 0.2 to 1.0 raises it from 88.54 % to 98.77 % (HEIGHT: 88.03 % to 98.89 %) |
 | Who does the robot collide with? | 335 of 336 pedestrian collisions involve a pedestrian that cannot perceive the robot (base rate 82.4 %) |
-| Does it keep more distance from people? | With the simulator's forecasts, 16 % fewer personal-space intrusions than the released checkpoint and 11.4 % fewer than HEIGHT fine-tuned to 350 M steps |
+| Does it keep more distance from people? | With the simulator's forecasts, seed 1 has 16 % fewer personal-space intrusions than the released checkpoint and 11.4 % fewer than HEIGHT fine-tuned to 350 M steps (3 to 13 % across the three seeds) |
 | And without the forecasts? | Retrained for 350 M steps without them, success is unchanged (87.03, 88.60 and 88.57 %) and the intrusion reduction is not significant (p = 0.13, 0.37, 0.51) |
 
 Training the HEIGHT baseline 75 % longer (to 350 M steps) changes its success by -0.26
-points (p = 0.74), so training length does not explain the success result either.
+points (p = 0.74), so that extra training did not raise success either.
 
 ## Architecture
 
@@ -60,8 +60,9 @@ points (p = 0.74), so training length does not explain the success result either
 ### The forecasts are privileged
 
 `sim.predict_method = 'truth'` rolls each pedestrian's own ORCA policy and goal forward
-five steps (0.5 s) inside the simulator, without the robot, so the forecast is exact only
-for pedestrians that ignore the robot. No deployed robot has this, and every result that
+five steps (0.5 s) inside the simulator, without the robot, so the forecast matches the
+live simulation only for pedestrians the robot does not influence, directly or through a
+neighbour that reacts to it. No deployed robot has this, and every result that
 uses it is oracle-assisted. The `exp_nopredict_s*` runs repeat the system with
 `sim.predict_method = 'none'`. A learned predictor is scaffolded in
 `training/prediction/` but was not used for any result here.
@@ -77,6 +78,8 @@ train.py, test.py             training and evaluation entry points
 collect_occlusion_data.py     collects occupancy grids from random-action episodes
 pretrain_occlusion_vae.py     pretrains the Label_VAE teacher
 set_config_value.py           changes one key in a configuration snapshot
+baselines/                    minimal stand-in for the parts of OpenAI Baselines the code imports
+pybullet_envs/, roboschool.py empty modules that keep two optional imports from failing
 results/logs/                 primary evaluation and training logs, per-episode JSON files
 results/figures/              architecture figure and training curves
 results/superseded/           early n = 500 outputs, kept for the record only
@@ -140,15 +143,30 @@ them:
 
 ## Reproducing
 
-Setup, as for HEIGHT:
+The runs used NVIDIA's PyTorch container 24.06 (Python 3.10, PyTorch
+2.4.0a0+f70bd71a48.nv24.06) with gym 0.26.2, pybullet 3.2.6, pyglet 1.5.27 and
+Python-RVO2; every other package was the container's own. `training/networks/envs.py`
+carries the edits gym 0.26 needs. Two pieces of HEIGHT's setup are replaced here:
+
+- OpenAI Baselines is not installed. `baselines/` is a small stand-in for the parts the
+  code imports (`bench.Monitor`, the vectorised-environment wrappers and a logger stub),
+  written for the gym 0.26 step and reset signatures. Every reported run used it; do not
+  install OpenAI Baselines over it.
+- `pybullet_envs/` and `roboschool.py` are empty modules. They stop the optional imports
+  in `training/networks/envs.py` from loading pybullet's bundled `pybullet_envs`, which
+  fails under gym 0.26.
 
 ```bash
-python3 -m venv venv && source venv/bin/activate
-pip install -r requirements.txt
-pip install cython
+# inside nvcr.io/nvidia/pytorch:24.06-py3, which provides PyTorch
+pip install gym==0.26.2 pybullet==3.2.6 pyglet==1.5.27 matplotlib pandas imageio cython
 git clone https://github.com/sybrenstuvel/Python-RVO2.git
 cd Python-RVO2 && python setup.py build && python setup.py install && cd ..
 ```
+
+Outside that container, install PyTorch first; only the version above has been used.
+`requirements.txt` is HEIGHT's original list, kept for reference: the code never imports
+TensorFlow, and the container's NumPy is newer than the pin there. A full `pip freeze` of
+the container was not archived, and the tree has not been run in a fresh environment.
 
 1. **Collect occupancy grids** from random-action episodes (1,000 for training, 100 for
    validation): `python3 collect_occlusion_data.py`
@@ -169,7 +187,7 @@ cd Python-RVO2 && python setup.py build && python setup.py install && cd ..
 Training used 28 parallel environments and 30 steps per rollout (840 environment steps
 per update), PPO with learning rate 5e-5 and linear decay, gamma 0.99, GAE lambda 0.95,
 clip 0.2 and entropy coefficient 0.01. A 50 M-step fine-tune took about 17 hours on one
-A100 at roughly 829 environment steps per second.
+40 GB MIG partition of an NVIDIA H100, at roughly 829 environment steps per second.
 
 ## Known issues
 
